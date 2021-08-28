@@ -1,0 +1,25 @@
+name: example
+log:
+  level: debug
+  formatter: console
+  color: true
+http:
+  host: 127.0.0.1
+  port: 8080
+  publicHost: 127.0.0.1
+  publicPort: 8080
+  maxConnectionsPerIp: 0
+  maxRequestsPerConnection: 0
+  keepAlive: true
+  keepalivePeriodSecond: 10
+  requestTimeoutSeconds: 10
+  cors:
+    allowedOrigins:
+      - *
+    allowedMethods:
+      - GET
+      - POST
+services:
+  handleTimeoutSecond: 10
+  
+

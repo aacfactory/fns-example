@@ -1,0 +1,5 @@
+name: example
+log:
+  level: info
+  formatter: console
+  color: true
