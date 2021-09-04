@@ -9,7 +9,7 @@ type User struct {
 	Id         string          `json:"id,omitempty"`
 	Name       string          `json:"name,omitempty"`
 	Password   string          `json:"password,omitempty"`
-	Gender     byte            `json:"gender,omitempty"`
+	Gender     []byte          `json:"gender,omitempty"`
 	Age        int             `json:"age,omitempty"`
 	Active     bool            `json:"active,omitempty"`
 	SignUpTime time.Time       `json:"signUpTime,omitempty"`

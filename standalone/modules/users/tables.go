@@ -9,7 +9,7 @@ type UserRow struct {
 	Id         string          `col:"ID"`
 	Name       string          `col:"NAME"`
 	Password   string          `col:"PASSWORD"`
-	Gender     byte            `col:"GENDER"`
+	Gender     []byte            `col:"GENDER"`
 	Age        int             `col:"AGE"`
 	Active     bool            `col:"ACTIVE"`
 	SignUpTime time.Time       `col:"SIGN_UP_TIME"`

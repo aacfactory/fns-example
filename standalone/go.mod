@@ -10,15 +10,15 @@ replace (
 
 require (
 	github.com/aacfactory/configuares v1.2.2
-	github.com/aacfactory/errors v1.4.0
+	github.com/aacfactory/errors v1.5.0
 	github.com/aacfactory/fns v0.0.1
 	github.com/aacfactory/fns-contrib/authorizations/jwt v0.0.0-20210904003123-1e4b4c8b7f02
 	github.com/aacfactory/fns-contrib/databases/sql v0.0.0-20210904003123-1e4b4c8b7f02
+	github.com/aacfactory/json v1.3.1
 	github.com/lib/pq v1.10.3
 )
 
 require (
-	github.com/aacfactory/json v1.2.0 // indirect
 	github.com/aacfactory/logs v1.1.3 // indirect
 	github.com/aacfactory/workers v1.2.0 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect

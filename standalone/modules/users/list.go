@@ -7,8 +7,8 @@ import (
 )
 
 type ListParam struct {
-	Offset int `json:"offset,omitempty" validate:"min=0,max=999"`
-	Length int `json:"length,omitempty" validate:"min=10,max=30"`
+	Offset int `json:"offset,omitempty" validate:"min=0,max=999" message:"offset is invalid"`
+	Length int `json:"length,omitempty" validate:"min=10,max=30" message:"length is invalid"`
 }
 
 const (

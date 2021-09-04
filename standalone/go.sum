@@ -2,12 +2,14 @@ github.com/aacfactory/configuares v1.1.1/go.mod h1:a5ICMvfAvMmoXj99SIlQmMruXKKVo
 github.com/aacfactory/configuares v1.2.1/go.mod h1:oaKvHPJ0KYw5e80P/dwvkQiLtQjp8kwiEvTOqGHrOtc=
 github.com/aacfactory/configuares v1.2.2 h1:JWgJs4cRWgnQzUwoxS+nh1JT57i1PiT853H43JSgomc=
 github.com/aacfactory/configuares v1.2.2/go.mod h1:oaKvHPJ0KYw5e80P/dwvkQiLtQjp8kwiEvTOqGHrOtc=
-github.com/aacfactory/errors v1.4.0 h1:dzaWjzYf3LpOi7Kj5hqlo73akAqQTVvMx0ORSo0RrkM=
 github.com/aacfactory/errors v1.4.0/go.mod h1:JS9R1OMhCZTURQxO+mHaeIKtqgn0EDGgb7lJuxGN2fo=
+github.com/aacfactory/errors v1.5.0 h1:w6V81oVKLTfVC2KK6nWVB3n82chawwJU6JuPE5qzXbA=
+github.com/aacfactory/errors v1.5.0/go.mod h1:QP1ow7NtrClLDRpecZcLJs1wPCyyuz+HyVf77oSAt4M=
 github.com/aacfactory/fns v0.0.0-20210827001338-b8eac66aecfa/go.mod h1:eH7Nz6NR2GaD+PjMjd5nZ+y9umVxYZIRVypcayIemJ0=
 github.com/aacfactory/json v1.1.0/go.mod h1:tVAv8RRR0maTmOci5o1gAP0QSiKJ0tkYHaiON4DEtOI=
-github.com/aacfactory/json v1.2.0 h1:FhS6BX5zSc54ik7AWvSw3b04RC2+WUB55Ifox/SnPQo=
 github.com/aacfactory/json v1.2.0/go.mod h1:q4DDnE7pLma8fj/Ag0pbHwrDUv77d5VWS66Oyqbeke8=
+github.com/aacfactory/json v1.3.1 h1:vb8l82RybafZTI+2mwEO3101HFNXO+PuCQsB8dM+aps=
+github.com/aacfactory/json v1.3.1/go.mod h1:jyFmajkZ9R9dgEPVNZMwLYQ2moTV92UdtV5AFJM0mBc=
 github.com/aacfactory/logs v1.1.1/go.mod h1:xgoHmsbNZIOm2/OdRfpGSVyZqPF3Ak2SBhakB5MRdUY=
 github.com/aacfactory/logs v1.1.3 h1:EhFqxUPLwxXWsIE3yzRqwAKJPMidaLefB6r+PRH2978=
 github.com/aacfactory/logs v1.1.3/go.mod h1:pfufsqd+gIZwLN+cT75AVCed5uXipdRep/4vxSmt4LM=
