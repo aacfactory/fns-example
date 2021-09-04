@@ -2,25 +2,31 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/aacfactory/fns"
-	"github.com/aacfactory/fns-example/modules/users"
+	_ "github.com/aacfactory/fns-contrib/authorizations/jwt"
+	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-example/standalone/modules/users"
+	_ "github.com/lib/pq"
 )
 
 func main() {
 
 	app, appErr := fns.New(
-		fns.ConfigRetriever("./config", "YAML", "debug", "app", '-'),
+		fns.ConfigRetriever("./config", "YAML", fns.ConfigActiveFromENV("FNS_ACTIVE"), "app", '-'),
 		fns.SecretKeyFile("./config/sk.txt"),
 		fns.Version("v0.0.1"),
 	)
 
 	if appErr != nil {
+		fmt.Printf("%+v\n", appErr)
 		panic(appErr)
 		return
 	}
 
 	_ = app.Deploy(
-		&users.Service{},
+		sql.Service(),
+		users.Service(),
 	)
 
 	runErr := app.Run(context.TODO())

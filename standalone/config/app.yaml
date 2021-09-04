@@ -1,4 +1,4 @@
-name: example
+name: standalone
 log:
   level: info
   formatter: console

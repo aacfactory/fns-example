@@ -302,3 +302,5 @@ $RECYCLE.BIN/
 ### IDEA
 .idea
 
+### config
+standalone/config/app-debug.yaml
