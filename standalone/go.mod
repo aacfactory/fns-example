@@ -11,9 +11,9 @@ replace (
 require (
 	github.com/aacfactory/configuares v1.2.2
 	github.com/aacfactory/errors v1.5.0
-	github.com/aacfactory/fns v0.2.0
-	github.com/aacfactory/fns-contrib/authorizations/jwt v0.0.0-20210904003123-1e4b4c8b7f02
-	github.com/aacfactory/fns-contrib/databases/sql v0.0.0-20210904003123-1e4b4c8b7f02
+	github.com/aacfactory/fns v0.3.0
+	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0
+	github.com/aacfactory/fns-contrib/databases/sql v0.3.0
 	github.com/aacfactory/json v1.4.2
 	github.com/lib/pq v1.10.3
 )
@@ -48,6 +48,7 @@ require (
 	github.com/tidwall/sjson v1.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.29.0 // indirect
+	go.uber.org/automaxprocs v1.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
 	golang.org/x/text v0.3.6 // indirect
