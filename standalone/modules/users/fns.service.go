@@ -11,7 +11,11 @@ const (
 	Namespace = "users"
 
 	CreateFn = "create"
+	GetFn    = "get"
 	ListFn   = "list"
+
+	LoginFn = "login"
+	RevokeTokenFn = "revoke_token"
 )
 
 func Service() fns.Service {
@@ -41,9 +45,15 @@ func (svc *_service) Description() (description []byte) {
 func (svc *_service) Handle(context fns.Context, fn string, argument fns.Argument) (result interface{}, err errors.CodeError) {
 	switch fn {
 	case CreateFn:
-		result, err = svc.invokeCreateFn(context, argument)
+		err = svc.invokeCreateFn(context, argument)
 	case ListFn:
 		result, err = svc.invokeListFn(context, argument)
+	case GetFn:
+		result, err = svc.invokeGetFn(context, argument)
+	case LoginFn:
+		result, err = svc.invokeLoginFn(context, argument)
+	case RevokeTokenFn:
+		err = svc.invokeTokenRevokeFn(context)
 	default:
 		err = errors.NotFound(fmt.Sprintf("%s was not found in %s", fn, Namespace))
 	}
@@ -55,7 +65,7 @@ func (svc *_service) Close() (err error) {
 	return
 }
 
-func (svc *_service) invokeCreateFn(context fns.Context, argument fns.Argument) (result interface{}, err errors.CodeError) {
+func (svc *_service) invokeCreateFn(context fns.Context, argument fns.Argument) (err errors.CodeError) {
 	// context with fn
 	context = fns.WithFn(context, CreateFn)
 	// check authorization
@@ -76,12 +86,28 @@ func (svc *_service) invokeCreateFn(context fns.Context, argument fns.Argument) 
 		return
 	}
 	// handle fn
-	handleErr := create(context, param)
-	if handleErr != nil {
-		err = handleErr
+	err = create(context, param)
+	return
+}
+
+func (svc *_service) invokeGetFn(context fns.Context, argument fns.Argument) (result interface{}, err errors.CodeError) {
+	context = fns.WithFn(context, GetFn)
+
+	param := GetParam{}
+	argErr := argument.As(&param)
+	if argErr != nil {
+		err = errors.BadRequest(fmt.Sprintf("fns %s/%s: parse argument failed", Namespace, GetFn)).WithCause(argErr)
 		return
 	}
-	result = fns.Empty{}
+
+	// validate arg
+	validateErr := context.App().Validate(param)
+	if validateErr != nil {
+		err = validateErr
+		return
+	}
+	// handle fn
+	result, err = get(context, param)
 	return
 }
 
@@ -103,5 +129,44 @@ func (svc *_service) invokeListFn(context fns.Context, argument fns.Argument) (r
 	}
 	// handle fn
 	result, err = list(context, param)
+	return
+}
+
+func (svc *_service) invokeLoginFn(context fns.Context, argument fns.Argument) (result interface{}, err errors.CodeError) {
+	context = fns.WithFn(context, LoginFn)
+
+	param := LoginParam{}
+	argErr := argument.As(&param)
+	if argErr != nil {
+		err = errors.BadRequest(fmt.Sprintf("fns %s/%s: parse argument failed", Namespace, LoginFn)).WithCause(argErr)
+		return
+	}
+
+	// validate arg
+	validateErr := context.App().Validate(param)
+	if validateErr != nil {
+		err = validateErr
+		return
+	}
+	// handle fn
+	result, err = login(context, param)
+	return
+}
+
+func (svc *_service) invokeTokenRevokeFn(context fns.Context) ( err errors.CodeError) {
+	context = fns.WithFn(context, RevokeTokenFn)
+
+	authorization, hasAuthorization := context.User().Authorization()
+	if !hasAuthorization {
+		err = errors.Unauthorized(fmt.Sprintf("fns %s/%s: no authorization", Namespace, RevokeTokenFn))
+		return
+	}
+	authorizationErr := context.App().Authorizations().Decode(context, authorization)
+	if authorizationErr != nil {
+		err = errors.Unauthorized(fmt.Sprintf("fns %s/%s: invalid authorization", Namespace, RevokeTokenFn)).WithCause(authorizationErr)
+		return
+	}
+	// handle fn
+	err = tokenRevoke(context)
 	return
 }

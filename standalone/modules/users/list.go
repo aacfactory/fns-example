@@ -11,25 +11,25 @@ type ListParam struct {
 	Length int `json:"length,omitempty" validate:"min=10,max=30" message:"length is invalid"`
 }
 
-const (
-	listSQL = `SELECT * FROM "FNS"."USER" OFFSET $1 LIMIT $2`
-)
-
+// list
+// @fn list
+// @validate false
+// @authorization false
+// @permission false
+// @description list user
 func list(ctx fns.Context, param ListParam) (users []*User, err errors.CodeError) {
+	const (
+		_query = `SELECT * FROM "FNS"."USER" OFFSET $1 LIMIT $2`
+	)
 
 	offset := param.Offset
 	length := param.Length
 
 	tuple := sql.NewTuple()
-	tupleErr := tuple.Append(offset, length)
-	if tupleErr != nil {
-		ctx.App().Log().Error().Caller().Cause(tupleErr).Message("append sql arg failed")
-		err = errors.ServiceError("app sql arg failed").WithCause(tupleErr)
-		return
-	}
+	tuple.Append(offset, length)
 
 	rows, queryErr := sql.Query(ctx, sql.Param{
-		Query: listSQL,
+		Query: _query,
 		Args:  tuple,
 		InTx:  false,
 	})
@@ -53,18 +53,7 @@ func list(ctx fns.Context, param ListParam) (users []*User, err errors.CodeError
 	}
 
 	for _, row := range userRows {
-		users = append(users, &User{
-			Id:         row.Id,
-			Name:       row.Name,
-			Password:   row.Password,
-			Gender:     row.Gender,
-			Age:        row.Age,
-			Active:     row.Active,
-			SignUpTime: row.SignUpTime,
-			Profile:    row.Profile,
-			Score:      row.Score,
-			DOB:        row.DOB,
-		})
+		users = append(users, UserViewMapFromTableRow(row))
 	}
 
 	if ctx.App().Log().DebugEnabled() {

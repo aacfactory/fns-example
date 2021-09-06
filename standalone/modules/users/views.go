@@ -5,11 +5,30 @@ import (
 	"time"
 )
 
+func UserViewMapFromTableRow(row *UserRow) (u *User) {
+	if row == nil {
+		return
+	}
+	u = &User{
+		Id:         row.Id,
+		Name:       row.Name,
+		Password:   row.Password,
+		Gender:     row.Gender,
+		Age:        row.Age,
+		Active:     row.Active,
+		SignUpTime: row.SignUpTime,
+		Profile:    row.Profile,
+		Score:      row.Score,
+		DOB:        row.DOB,
+	}
+	return
+}
+
 type User struct {
 	Id         string          `json:"id,omitempty"`
 	Name       string          `json:"name,omitempty"`
 	Password   string          `json:"password,omitempty"`
-	Gender     []byte          `json:"gender,omitempty"`
+	Gender     string          `json:"gender,omitempty"`
 	Age        int             `json:"age,omitempty"`
 	Active     bool            `json:"active,omitempty"`
 	SignUpTime time.Time       `json:"signUpTime,omitempty"`
