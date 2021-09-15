@@ -23,7 +23,6 @@ func get(ctx fns.Context, param GetParam) (user *User, err errors.CodeError) {
 	rows, queryErr := sql.Query(ctx, sql.Param{
 		Query: _query,
 		Args:  tuple,
-		InTx:  false,
 	})
 
 	if queryErr != nil {

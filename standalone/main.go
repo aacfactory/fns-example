@@ -6,6 +6,7 @@ import (
 	"github.com/aacfactory/fns"
 	_ "github.com/aacfactory/fns-contrib/authorizations/jwt"
 	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-example/standalone/modules/posts"
 	"github.com/aacfactory/fns-example/standalone/modules/users"
 	_ "github.com/lib/pq"
 )
@@ -27,6 +28,7 @@ func main() {
 	_ = app.Deploy(
 		sql.Service(),
 		users.Service(),
+		posts.Service(),
 	)
 
 	runErr := app.Run(context.TODO())

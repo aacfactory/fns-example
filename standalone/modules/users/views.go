@@ -14,10 +14,10 @@ func UserViewMapFromTableRow(row *UserRow) (u *User) {
 		Name:       row.Name,
 		Password:   row.Password,
 		Gender:     row.Gender,
-		Age:        row.Age,
+		Age:        row.Age.Id,
 		Active:     row.Active,
 		SignUpTime: row.SignUpTime,
-		Profile:    row.Profile,
+		Profile:    json.UnsafeMarshal(row.Profile),
 		Score:      row.Score,
 		DOB:        row.DOB,
 	}

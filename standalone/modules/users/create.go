@@ -4,13 +4,13 @@ import (
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns"
 	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-example/standalone/repository"
 	"github.com/aacfactory/fns/secret"
 	"github.com/aacfactory/json"
 	"time"
 )
 
 type CreateParam struct {
-	Id       string    `json:"id,omitempty" validate:"required" message:"id is invalid"`
 	Name     string    `json:"name,omitempty" validate:"required" message:"name is invalid"`
 	Password string    `json:"password,omitempty" validate:"required" message:"password is invalid"`
 	Gender   string    `json:"gender,omitempty" validate:"required" message:"gender is invalid"`
@@ -23,41 +23,45 @@ type CreateParam struct {
 // create
 // @fn create
 // @validate true
+// @sqlTX true
 // @authorization true
 // @permission true
 // @description foo
 func create(ctx fns.Context, param CreateParam) (err errors.CodeError) {
-	const (
-		_query = `INSERT INTO "FNS"."USER" 
-				  	(
-				  	"ID", "NAME", "PASSWORD", "AGE", "ACTIVE", "SIGN_UP_TIME", "PROFILE", "SCORE", "DOB", "GENDER"
-					)
-				  	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
-	)
+
 	password, _ := secret.HashPassword([]byte(param.Password))
-	signupTime := time.Now()
 
-	//dob, _ := time.Parse("2006-01-02", param.DOB)
+	row := &repository.UserRow{
+		Id:         fns.UID(),
+		CreateBY:   "-",
+		CreateAT:   time.Now(),
+		Version:    1,
+		Name:       param.Name,
+		Password:   string(password),
+		Gender:     param.Gender,
+		Age:        param.Age,
+		Active:     true,
+		SignUpTime: time.Now(),
+		Profile: &repository.UserProfile{
+			Name: param.Name,
+			Age:  param.Age,
+		},
+		Score: param.Score,
+		DOB:   param.DOB.ToTime(),
+		Posts: nil,
+	}
 
-	tuple := sql.NewTuple()
-	tuple.Append(param.Id, param.Name, string(password), param.Age, true, signupTime, []byte("{}"), param.Score, param.DOB, param.Gender)
+	affected, insertErr := sql.DAO(row).Insert(ctx)
 
-
-	r, execErr := sql.Execute(ctx, sql.Param{
-		Query: _query,
-		Args:  tuple,
-		InTx:  false,
-	})
-
-	if execErr != nil {
-		ctx.App().Log().Error().Caller().Cause(execErr).Message("execute failed")
-		err = errors.ServiceError("execute failed").WithCause(execErr)
+	if insertErr != nil {
+		ctx.App().Log().Error().Caller().Cause(insertErr).Message("execute failed")
+		err = errors.ServiceError("execute failed").WithCause(insertErr)
 		return
 	}
 
-	if r.Affected < 1 {
-		ctx.App().Log().Error().Caller().Cause(execErr).Message("execute failed no affected")
-		err = errors.ServiceError("execute failed for no affected").WithCause(execErr)
+	if affected < 1 {
+		ctx.App().Log().Error().Caller().Message("execute failed no affected")
+		err = errors.ServiceError("execute failed for no affected")
 		return
 	}
 
