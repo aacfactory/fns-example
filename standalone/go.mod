@@ -3,15 +3,15 @@ module github.com/aacfactory/fns-example/standalone
 go 1.17
 
 replace (
-	github.com/aacfactory/fns v0.3.0 => ../../fns
+	github.com/aacfactory/fns v0.6.14 => ../../fns
 	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0 => ../../fns-contrib/authorizations/jwt
 	github.com/aacfactory/fns-contrib/databases/sql v0.3.0 => ../../fns-contrib/databases/sql
 )
 
 require (
 	github.com/aacfactory/configuares v1.2.3
-	github.com/aacfactory/errors v1.6.0
-	github.com/aacfactory/fns v0.5.0
+	github.com/aacfactory/errors v1.6.2
+	github.com/aacfactory/fns v0.6.14
 	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0
 	github.com/aacfactory/fns-contrib/databases/sql v0.3.0
 	github.com/aacfactory/json v1.4.2
@@ -19,7 +19,7 @@ require (
 )
 
 require (
-	github.com/aacfactory/logs v1.1.3 // indirect
+	github.com/aacfactory/logs v1.2.0 // indirect
 	github.com/aacfactory/workers v1.2.0 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/fatih/color v1.12.0 // indirect

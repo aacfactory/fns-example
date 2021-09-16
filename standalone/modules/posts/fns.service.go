@@ -40,8 +40,7 @@ func (svc *_service) Description() (description []byte) {
 func (svc *_service) Handle(context fns.Context, fn string, argument fns.Argument) (result interface{}, err errors.CodeError) {
 	switch fn {
 	case CreateFn:
-		err = svc.invokeCreateFn(context, argument)
-
+		result, err = svc.invokeCreateFn(context, argument)
 	default:
 		err = errors.NotFound(fmt.Sprintf("%s was not found in %s", fn, Namespace))
 	}
@@ -53,7 +52,7 @@ func (svc *_service) Close() (err error) {
 	return
 }
 
-func (svc *_service) invokeCreateFn(context fns.Context, argument fns.Argument) (err errors.CodeError) {
+func (svc *_service) invokeCreateFn(context fns.Context, argument fns.Argument) (v interface{}, err errors.CodeError) {
 	// context with fn
 	context = fns.WithFn(context, CreateFn)
 	// check authorization
@@ -74,6 +73,6 @@ func (svc *_service) invokeCreateFn(context fns.Context, argument fns.Argument) 
 		return
 	}
 	// handle fn
-	err = create(context, param)
+	v, err = create(context, param)
 	return
 }

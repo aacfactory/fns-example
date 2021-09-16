@@ -4,13 +4,13 @@ import "time"
 
 type UserRow struct {
 	Id         string       `col:"ID,PK"`
-	CreateBY   string       `col:"CREATE_BY,CREATE_BY"`
-	CreateAT   time.Time    `col:"CREATE_AT,CREATE_AT"`
-	ModifyBY   string       `col:"MODIFY_BY,MODIFY_BY"`
-	ModifyAT   time.Time    `col:"MODIFY_AT,MODIFY_AT"`
-	DeleteBY   string       `col:"DELETE_BY,DELETE_BY"`
-	DeleteAT   time.Time    `col:"DELETE_AT,DELETE_AT"`
-	Version    int64        `col:"VERSION,VERSION"`
+	CreateBY   string       `col:"CREATE_BY,ACB"`
+	CreateAT   time.Time    `col:"CREATE_AT,ACT"`
+	ModifyBY   string       `col:"MODIFY_BY,AMB"`
+	ModifyAT   time.Time    `col:"MODIFY_AT,AMT"`
+	DeleteBY   string       `col:"DELETE_BY,ADB"`
+	DeleteAT   time.Time    `col:"DELETE_AT,ADT"`
+	Version    int64        `col:"VERSION,OL"`
 	Name       string       `col:"NAME"`
 	Password   string       `col:"PASSWORD"`
 	Gender     string       `col:"GENDER"`
@@ -20,7 +20,7 @@ type UserRow struct {
 	Profile    *UserProfile `col:"PROFILE,JSON"`
 	Score      float64      `col:"SCORE"`
 	DOB        time.Time    `col:"DOB"`
-	Posts      []*PostRow   `col:"-,LK" sort:"CREATE_AT DESC"`
+	//Posts      []*PostRow   `col:"-,LK" ref:"ID,AUTHOR_ID" sort:"CREATE_AT DESC"`
 }
 
 func (r *UserRow) Table() (string, string, string) {

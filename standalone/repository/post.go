@@ -4,16 +4,16 @@ import "time"
 
 type PostRow struct {
 	Id       string            `col:"ID,PK"`
-	CreateBY string            `col:"CREATE_BY,CREATE_BY"`
-	CreateAT time.Time         `col:"CREATE_AT,CREATE_AT"`
-	ModifyBY string            `col:"MODIFY_BY,MODIFY_BY"`
-	ModifyAT time.Time         `col:"MODIFY_AT,MODIFY_AT"`
-	Version  int64             `col:"VERSION,VERSION"`
+	CreateBY string            `col:"CREATE_BY,ACB"`
+	CreateAT time.Time         `col:"CREATE_AT,ACT"`
+	ModifyBY string            `col:"MODIFY_BY,AMB"`
+	ModifyAT time.Time         `col:"MODIFY_AT,AMT"`
+	Version  int64             `col:"VERSION,OL"`
 	Title    string            `col:"TITLE"`
 	Content  string            `col:"CONTENT"`
-	Author   *UserRow          `col:"AUTHOR_ID,FK:SYNC"`
-	Likes    int               `col:"LIKES,VC" src:"SELECT COUNT(1) FROM \"FNS\".\"POST_LIKE\" WHERE \"POST_ID\" = POST_ID = \"P\".\"ID\" "`
-	Comments []*PostCommentRow `col:"-,LK:SYNC" sort:"CREATE_AT DESC"`
+	Author   *UserRow          `col:"AUTHOR_ID,FK"`
+	Likes    int               `col:"LIKES,VC" src:"SELECT COUNT(1) FROM \"FNS\".\"POST_LIKE\" WHERE \"POST_ID\" = \"P\".\"ID\" "`
+	Comments []*PostCommentRow `col:"-,LK:SYNC" ref:"ID,POST_ID" sort:"CREATE_AT DESC"`
 }
 
 func (r *PostRow) Table() (string, string, string) {
@@ -22,8 +22,8 @@ func (r *PostRow) Table() (string, string, string) {
 
 type PostLikeRow struct {
 	Id       string    `col:"ID,PK"`
-	CreateBY string    `col:"CREATE_BY,CREATE_BY"`
-	CreateAT time.Time `col:"CREATE_AT,CREATE_AT"`
+	CreateBY string    `col:"CREATE_BY,ACB"`
+	CreateAT time.Time `col:"CREATE_AT,ACT"`
 	Post     *PostRow  `col:"POST_ID,FK"`
 }
 
@@ -33,8 +33,8 @@ func (r *PostLikeRow) Table() (string, string, string) {
 
 type PostCommentRow struct {
 	Id       string    `col:"ID,PK"`
-	CreateBY string    `col:"CREATE_BY,CREATE_BY"`
-	CreateAT time.Time `col:"CREATE_AT,CREATE_AT"`
+	CreateBY string    `col:"CREATE_BY,ACB"`
+	CreateAT time.Time `col:"CREATE_AT,ACT"`
 	Post     *PostRow  `col:"POST_ID,FK"`
 	User     *UserRow  `col:"USER_ID,FK"`
 	Content  string    `col:"CONTENT"`

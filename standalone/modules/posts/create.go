@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"fmt"
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns"
 	"github.com/aacfactory/fns-contrib/databases/sql"
@@ -20,12 +21,12 @@ type CreateParam struct {
 // @authorization true
 // @permission true
 // @description foo
-func create(ctx fns.Context, param CreateParam) (err errors.CodeError) {
+func create(ctx fns.Context, param CreateParam) (row0 *repository.PostRow, err errors.CodeError) {
 
 	row := &repository.PostRow{
 		Id:       fns.UID(),
 		CreateBY: "-",
-		CreateAT: time.Now(),
+		CreateAT: time.Time{},
 		Version:  1,
 		Title:    param.Title,
 		Content:  param.Content,
@@ -39,7 +40,7 @@ func create(ctx fns.Context, param CreateParam) (err errors.CodeError) {
 	comments = append(comments, &repository.PostCommentRow{
 		Id:       fns.UID(),
 		CreateBY: "-",
-		CreateAT: time.Now(),
+		CreateAT: time.Time{},
 		Post:     row,
 		User:     row.Author,
 		Content:  "foo",
@@ -61,5 +62,18 @@ func create(ctx fns.Context, param CreateParam) (err errors.CodeError) {
 		return
 	}
 
+	x := &repository.PostRow{
+		Id: row.Id,
+	}
+
+	has, getErr := sql.DAO(x).Get(ctx)
+	fmt.Println(has, getErr)
+	fmt.Println(fmt.Sprintf("%+v", *x))
+
+	fmt.Println("Author", fmt.Sprintf("%+v", x.Author))
+	fmt.Println("Comments", fmt.Sprintf("%+v", x.Comments))
+	fmt.Println("Comments", fmt.Sprintf("%+v", x.Comments[0].User))
+	fmt.Println("Comments", fmt.Sprintf("%+v", x.Comments[0].Post))
+	fmt.Println("Comments", fmt.Sprintf("%+v", x.Comments[0].Post.Comments[0]))
 	return
 }

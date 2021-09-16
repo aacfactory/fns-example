@@ -48,7 +48,6 @@ func create(ctx fns.Context, param CreateParam) (err errors.CodeError) {
 		},
 		Score: param.Score,
 		DOB:   param.DOB.ToTime(),
-		Posts: nil,
 	}
 
 	affected, insertErr := sql.DAO(row).Insert(ctx)
