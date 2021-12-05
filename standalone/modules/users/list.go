@@ -12,7 +12,7 @@ type ListParam struct {
 }
 
 // list
-// @fn list
+// list
 // @validate false
 // @authorization false
 // @permission false

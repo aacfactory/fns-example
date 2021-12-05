@@ -6,12 +6,13 @@ replace (
 	github.com/aacfactory/fns v0.6.14 => ../../fns
 	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0 => ../../fns-contrib/authorizations/jwt
 	github.com/aacfactory/fns-contrib/databases/sql v0.3.0 => ../../fns-contrib/databases/sql
+	github.com/aacfactory/fns-contrib/databases/redis v0.5.0 => ../../fns-contrib/databases/redis
 )
 
 require (
 	github.com/aacfactory/configuares v1.2.3
 	github.com/aacfactory/errors v1.6.2
-	github.com/aacfactory/fns v0.6.14
+	github.com/aacfactory/fns v0.6.15
 	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0
 	github.com/aacfactory/fns-contrib/databases/sql v0.3.0
 	github.com/aacfactory/json v1.4.2
@@ -19,13 +20,17 @@ require (
 )
 
 require (
+	github.com/aacfactory/fns-contrib/databases/redis v0.5.0 // indirect
 	github.com/aacfactory/logs v1.2.0 // indirect
 	github.com/aacfactory/workers v1.2.0 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
+	github.com/go-redis/redis/v8 v8.11.3 // indirect
 	github.com/goccy/go-yaml v1.9.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
@@ -48,4 +53,5 @@ require (
 	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 )

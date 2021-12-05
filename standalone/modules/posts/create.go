@@ -9,25 +9,27 @@ import (
 	"time"
 )
 
+// CreateParam
+// @title 活动助手登录参数
+// @description 活动助手登录参数
 type CreateParam struct {
-	Title   string `json:"title" validate:"required" message:"title is invalid"`
+	// Title
+	// @title Title
+	// @description Title
+	Title string `json:"title" validate:"required" message:"title is invalid"`
+	// Content
+	// @title Content
+	// @description Content
 	Content string `json:"content" validate:"not_blank" message:"content is invalid"`
 }
 
-// create
-// @fn create
-// @validate true
-// @sqlTX true
-// @authorization true
-// @permission true
-// @description foo
 func create(ctx fns.Context, param CreateParam) (row0 *repository.PostRow, err errors.CodeError) {
 
 	row := &repository.PostRow{
 		Id:       fns.UID(),
 		CreateBY: "-",
 		CreateAT: time.Time{},
-		Version:  1,
+		Version:  0,
 		Title:    param.Title,
 		Content:  param.Content,
 		Author: &repository.UserRow{
@@ -48,7 +50,7 @@ func create(ctx fns.Context, param CreateParam) (row0 *repository.PostRow, err e
 
 	row.Comments = comments
 
-	affected, insertErr := sql.DAO(row).Insert(ctx)
+	affected, insertErr := sql.DAO(ctx).Insert(ctx, row)
 
 	if insertErr != nil {
 		ctx.App().Log().Error().Caller().Cause(insertErr).Message("execute failed")
@@ -66,7 +68,7 @@ func create(ctx fns.Context, param CreateParam) (row0 *repository.PostRow, err e
 		Id: row.Id,
 	}
 
-	has, getErr := sql.DAO(x).Get(ctx)
+	has, getErr := sql.DAO(ctx).Get(ctx, x)
 	fmt.Println(has, getErr)
 	fmt.Println(fmt.Sprintf("%+v", *x))
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aacfactory/fns"
 	_ "github.com/aacfactory/fns-contrib/authorizations/jwt"
+	"github.com/aacfactory/fns-contrib/databases/redis"
 	"github.com/aacfactory/fns-contrib/databases/sql"
 	"github.com/aacfactory/fns-example/standalone/modules/posts"
 	"github.com/aacfactory/fns-example/standalone/modules/users"
@@ -27,6 +28,7 @@ func main() {
 
 	_ = app.Deploy(
 		sql.Service(),
+		redis.Service(),
 		users.Service(),
 		posts.Service(),
 	)

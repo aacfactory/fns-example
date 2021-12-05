@@ -21,9 +21,9 @@ type CreateParam struct {
 }
 
 // create
-// @fn create
+//  create
 // @validate true
-// @sqlTX true
+// @tx sql
 // @authorization true
 // @permission true
 // @description foo
@@ -50,7 +50,7 @@ func create(ctx fns.Context, param CreateParam) (err errors.CodeError) {
 		DOB:   param.DOB.ToTime(),
 	}
 
-	affected, insertErr := sql.DAO(row).Insert(ctx)
+	affected, insertErr := sql.DAO(ctx).Insert(ctx, row)
 
 	if insertErr != nil {
 		ctx.App().Log().Error().Caller().Cause(insertErr).Message("execute failed")
