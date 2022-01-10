@@ -7,12 +7,15 @@ import (
 	_ "github.com/aacfactory/fns-contrib/authorizations/jwt"
 	"github.com/aacfactory/fns-contrib/databases/redis"
 	"github.com/aacfactory/fns-contrib/databases/sql"
-	"github.com/aacfactory/fns-example/standalone/modules/posts"
-	"github.com/aacfactory/fns-example/standalone/modules/users"
+	"github.com/aacfactory/fns-example/standalone/modules/samples"
+	"github.com/aacfactory/json"
 	_ "github.com/lib/pq"
+	"time"
 )
 
 func main() {
+	x, _ := json.Marshal(time.Now())
+	fmt.Println(string(x))
 
 	app, appErr := fns.New(
 		fns.ConfigRetriever("./config", "YAML", fns.ConfigActiveFromENV("FNS_ACTIVE"), "app", '-'),
@@ -29,8 +32,7 @@ func main() {
 	_ = app.Deploy(
 		sql.Service(),
 		redis.Service(),
-		users.Service(),
-		posts.Service(),
+		samples.Service(),
 	)
 
 	runErr := app.Run(context.TODO())

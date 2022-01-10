@@ -1,2 +1,0 @@
-// Package posts
-package posts

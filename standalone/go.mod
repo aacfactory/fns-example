@@ -3,24 +3,24 @@ module github.com/aacfactory/fns-example/standalone
 go 1.17
 
 replace (
-	github.com/aacfactory/fns v0.6.14 => ../../fns
-	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0 => ../../fns-contrib/authorizations/jwt
-	github.com/aacfactory/fns-contrib/databases/sql v0.3.0 => ../../fns-contrib/databases/sql
-	github.com/aacfactory/fns-contrib/databases/redis v0.5.0 => ../../fns-contrib/databases/redis
+	github.com/aacfactory/fns v0.8.4 => ../../fns
+	github.com/aacfactory/fns-contrib/authorizations/jwt v0.8.4 => ../../fns-contrib/authorizations/jwt
+	github.com/aacfactory/fns-contrib/databases/redis v0.8.0 => ../../fns-contrib/databases/redis
+	github.com/aacfactory/fns-contrib/databases/sql v0.8.1 => ../../fns-contrib/databases/sql
 )
 
 require (
 	github.com/aacfactory/configuares v1.2.3
 	github.com/aacfactory/errors v1.6.2
-	github.com/aacfactory/fns v0.6.15
-	github.com/aacfactory/fns-contrib/authorizations/jwt v0.3.0
-	github.com/aacfactory/fns-contrib/databases/sql v0.3.0
-	github.com/aacfactory/json v1.4.2
+	github.com/aacfactory/fns v0.8.4
+	github.com/aacfactory/fns-contrib/authorizations/jwt v0.8.4
+	github.com/aacfactory/fns-contrib/databases/redis v0.8.0
+	github.com/aacfactory/fns-contrib/databases/sql v0.8.1
+	github.com/aacfactory/json v1.4.3
 	github.com/lib/pq v1.10.3
 )
 
 require (
-	github.com/aacfactory/fns-contrib/databases/redis v0.5.0 // indirect
 	github.com/aacfactory/logs v1.2.0 // indirect
 	github.com/aacfactory/workers v1.2.0 // indirect
 	github.com/andybalholm/brotli v1.0.3 // indirect
@@ -50,8 +50,8 @@ require (
 	github.com/valyala/fasthttp v1.29.0 // indirect
 	go.uber.org/automaxprocs v1.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
 )
