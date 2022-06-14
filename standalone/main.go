@@ -1,55 +1,42 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"github.com/aacfactory/fns"
-	_ "github.com/aacfactory/fns-contrib/authorizations/jwt"
-	"github.com/aacfactory/fns-contrib/databases/redis"
-	"github.com/aacfactory/fns-contrib/databases/sql"
-	"github.com/aacfactory/fns-example/standalone/modules/samples"
-	"github.com/aacfactory/json"
+	"github.com/aacfactory/fns-example/standalone/modules/hellos"
 	_ "github.com/lib/pq"
-	"time"
 )
 
 func main() {
-	x, _ := json.Marshal(time.Now())
-	fmt.Println(string(x))
 
-	app, appErr := fns.New(
-		fns.ConfigRetriever("./config", "YAML", fns.ConfigActiveFromENV("FNS_ACTIVE"), "app", '-'),
-		fns.SecretKeyFile("./config/sk.txt"),
+	app := fns.New(
+		fns.ConfigRetriever("./config", "YAML", fns.ConfigActiveFromENV("FNS-ACTIVE"), "app", '-'),
+		fns.SecretKey("test"),
+		fns.MAXPROCS(0, 16),
 		fns.Version("v0.0.1"),
 	)
 
-	if appErr != nil {
-		fmt.Printf("%+v\n", appErr)
-		panic(appErr)
-		return
-	}
-
-	_ = app.Deploy(
-		sql.Service(),
-		redis.Service(),
-		samples.Service(),
+	deployErr := app.Deploy(
+		hellos.Service(),
 	)
 
-	runErr := app.Run(context.TODO())
-
+	if deployErr != nil {
+		app.Log().Error().Cause(deployErr).Caller().Message("app deploy failed")
+		return
+	}
+	runErr := app.Run()
 	if runErr != nil {
 		app.Log().Error().Cause(runErr).Caller().Message("app run failed")
 		return
 	}
-
 	if app.Log().DebugEnabled() {
 		app.Log().Debug().Caller().Message("running...")
 	}
-
-	app.Sync()
-
+	syncErr := app.Sync()
+	if syncErr != nil {
+		app.Log().Error().Cause(syncErr).Caller().Message("app sync failed")
+		return
+	}
 	if app.Log().DebugEnabled() {
 		app.Log().Debug().Message("stopped!!!")
 	}
-
 }
