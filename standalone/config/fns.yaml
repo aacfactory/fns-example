@@ -9,6 +9,9 @@ log:
   color: true
 server:
   port: 80
+authorizations:
+  encoding:
+  store:
 oas:
   title: Standalone
   description: |

@@ -27,7 +27,7 @@ func GetWorld(ctx context.Context) (w World) {
 }
 
 // NewWorld
-// @component world
+// component world
 func NewWorld() service.Component {
 	return &world{
 		log:   nil,

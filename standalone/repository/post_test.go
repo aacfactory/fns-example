@@ -371,3 +371,45 @@ func TestSearch(t *testing.T) {
 	fmt.Println(x, x < len(s))
 	fmt.Println(sort.SearchStrings(s, "5") < len(s))
 }
+
+func TestToken(t *testing.T) {
+	s := "Fns: foo"
+	fmt.Println(s[5:], bytes.Index([]byte(s), []byte("Fns: ")))
+	fmt.Println(bytes.Index([]byte(s), []byte("Fns: ")) != 0)
+}
+
+func appendSlice(ss []interface{}) {
+	ss = append(ss, 1)
+}
+
+func TestAppend(t *testing.T) {
+	ss := make([]interface{}, 0, 1)
+	ss = append(ss[:], 0)
+	appendSlice(ss)
+	fmt.Println(ss)
+	s := S{}
+	fmt.Println(s, s.SS, len(s.SS.values))
+}
+
+type S struct {
+	N       string
+	SS      SS
+	B       bool
+	F       float32
+	Now     time.Time
+	NowDate json.Date
+	DT      json.Time
+	P       json.RawMessage
+}
+
+type SS struct {
+	values []string
+}
+
+func TestFT(t *testing.T) {
+	rt := reflect.TypeOf(S{})
+	for i := 0; i < rt.NumField(); i++ {
+		f := rt.Field(i)
+		fmt.Println(f.Name, f.Type.Name(), f.Type.Kind(), f.Type.String())
+	}
+}

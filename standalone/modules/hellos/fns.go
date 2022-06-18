@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-example/standalone/modules/hellos/components"
+	"github.com/aacfactory/fns/endpoints/authorizations"
 	"github.com/aacfactory/fns/service"
 	"github.com/aacfactory/fns/service/validators"
 )
@@ -28,8 +29,10 @@ func Hello(ctx context.Context, argument HelloArgument) (result *HelloResult, er
 }
 
 func Service() (svc service.Service) {
+	// todo components
+
 	svc = &_service_{
-		service.NewAbstract(
+		Abstract: service.NewAbstract(
 			"hellos",
 			false,
 			components.NewWorld(),
@@ -45,29 +48,34 @@ type _service_ struct {
 func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Argument) (v interface{}, err errors.CodeError) {
 	switch fn {
 	case "hello":
+		// verify authorizations
+		verifyErr := authorizations.Verify(ctx)
+		if verifyErr != nil {
+			err = verifyErr.WithMeta("service", "hellos").WithMeta("fn", fn)
+			return
+		}
+		// todo verify permissions
+
+		// create argument
 		helloArgument := HelloArgument{}
 		argumentAsErr := argument.As(&helloArgument)
 		if argumentAsErr != nil {
 			err = errors.BadRequest("service: bad argument").WithCause(argumentAsErr).WithMeta("service", "hellos").WithMeta("fn", fn)
 			return
 		}
+		// validate argument
 		validateErr := validators.Validate(helloArgument)
 		if validateErr != nil {
 			err = errors.BadRequest("service: invalid argument").WithMeta("service", "hellos").WithMeta("fn", fn).WithCause(validateErr)
 			return
 		}
+		//
+		// handle fn
 		v, err = hello(ctx, helloArgument)
 		break
 	default:
 		err = errors.NotFound("service: fn was not found").WithMeta("service", "hellos").WithMeta("fn", fn)
 		break
-	}
-	return
-}
-
-func (svc *_service_) Close() {
-	if svc.Log().DebugEnabled() {
-		svc.Log().Debug().Caller().Message("service: close")
 	}
 	return
 }
