@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bytes"
+	"container/list"
 	"context"
 	"crypto/md5"
 	"crypto/rand"
@@ -412,4 +413,87 @@ func TestFT(t *testing.T) {
 		f := rt.Field(i)
 		fmt.Println(f.Name, f.Type.Name(), f.Type.Kind(), f.Type.String())
 	}
+}
+
+func TestFlag(t *testing.T) {
+	r := 1
+	w := 2
+	rw := r | w
+	fmt.Println(rw)
+	fmt.Println("1+r", 1&r)
+	fmt.Println("1+w", 1&w)
+	fmt.Println("1+rw", 1&rw)
+	fmt.Println("2+r", 2&r)
+	fmt.Println("2+w", 2&w)
+	fmt.Println("2+rw", 2&rw)
+	fmt.Println("rw+rw", rw&rw)
+	fmt.Println("rw+rw", 4&rw)
+}
+
+type E struct {
+	V string
+}
+
+func TestList(t *testing.T) {
+	es := list.New()
+	for i := 0; i < 5; i++ {
+		es.PushBack(&E{
+			V: fmt.Sprintf("%v", i),
+		})
+	}
+	fmt.Println(es.Len())
+	head := es.Front()
+	for i := 0; i < es.Len(); i++ {
+		fmt.Print(head.Value, " ")
+		head = head.Next()
+	}
+	fmt.Println()
+	es.Remove(es.Front())
+	head = es.Front()
+	for i := 0; i < es.Len(); i++ {
+		fmt.Print(head.Value, " ")
+		head = head.Next()
+	}
+	fmt.Println()
+}
+
+func TestGet(t *testing.T) {
+
+}
+
+func get(dst interface{}) (err error) {
+	if dst == nil {
+		err = fmt.Errorf("copy failed for dst is nil")
+		return
+	}
+	dpv := reflect.ValueOf(dst)
+	if dpv.Kind() != reflect.Ptr {
+		err = fmt.Errorf("copy failed for type of dst is not ptr")
+		return
+	}
+	src := &S{
+		N:       "fff",
+		SS:      SS{},
+		B:       false,
+		F:       0,
+		Now:     time.Time{},
+		NowDate: json.Date{},
+		DT:      json.Time{},
+		P:       nil,
+	}
+	sv := reflect.ValueOf(src)
+	dv := reflect.Indirect(dpv)
+	if sv.Kind() == reflect.Ptr {
+		sv = sv.Elem()
+	}
+	if sv.IsValid() && sv.Type().AssignableTo(dv.Type()) {
+		dv.Set(sv)
+		return
+	}
+	if dv.Kind() == sv.Kind() && sv.Type().ConvertibleTo(dv.Type()) {
+		dv.Set(sv.Convert(dv.Type()))
+		return
+	}
+	err = fmt.Errorf("copy failed for type is not matched")
+	return
 }

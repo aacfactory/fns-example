@@ -28,4 +28,8 @@ type User struct {
 	// @title 头像图片地址
 	// @description 头像图片地址
 	Avatar string `json:"avatar"`
+	// Ok
+	// @title Ok
+	// @description Ok
+	Ok bool `json:"ok"`
 }

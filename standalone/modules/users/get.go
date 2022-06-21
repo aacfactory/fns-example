@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
+	"github.com/aacfactory/fns/service"
 )
 
 // GetArgument
@@ -37,8 +38,7 @@ func get(ctx context.Context, argument GetArgument) (v *User, err errors.CodeErr
 		Gender: "F",
 		Age:    10,
 		Avatar: "bar",
+		Ok:     service.ApplicationIsRunning(ctx),
 	}
-	err = errors.ServiceError("").WithMeta("", "")
-
 	return
 }

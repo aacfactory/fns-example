@@ -16,6 +16,8 @@ func main() {
 
 	app := fns.New(
 		//fns.ConfigRetriever("./config", "YAML", fns.ConfigActiveFromENV("FNS-ACTIVE"), "app", '-'),
+		//fns.Server(http3.Server()),
+		fns.ExtraListeners(),
 		fns.Version("v0.0.1"),
 	)
 
