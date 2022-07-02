@@ -1,0 +1,15 @@
+log:
+  level: error
+  formatter: json
+server:
+  port: 8800
+sql:
+  driver: postgres
+  masterSlaverMode: false
+  dsn:
+  - dsn
+  maxIdles: 8
+  maxOpens: 64
+  enableDebugLog: false
+  gtmCleanUpSecond: 60
+  isolation: 2

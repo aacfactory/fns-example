@@ -308,3 +308,4 @@ standalone/config/fns-debug.yaml
 ### TEMP
 graph_sql
 /standalone/config/fns-debug.yaml
+/standalone/config/fns-test.yaml
