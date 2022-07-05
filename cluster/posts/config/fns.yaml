@@ -1,0 +1,12 @@
+name: posts
+runtime:
+  maxWorkers: 262144
+  workerMaxIdleSeconds: 10
+  handleTimeoutSeconds: 10
+log:
+  level: info
+  formatter: console
+oas:
+  title: posts
+server:
+  port: 8800

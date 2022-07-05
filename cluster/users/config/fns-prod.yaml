@@ -1,0 +1,25 @@
+log:
+  level: error
+  formatter: json
+server:
+  port: 8800
+cluster:
+  devMode: false
+  nodesProxyAddress: ""
+  kind: members
+  client:
+    maxIdleConnSeconds: 60
+    requestTimeoutSeconds: 10
+  options:
+    members:
+    - ip:port
+sql:
+  driver: postgres
+  masterSlaverMode: false
+  dsn:
+  - dsn
+  maxIdles: 8
+  maxOpens: 64
+  enableDebugLog: false
+  gtmCleanUpSecond: 60
+  isolation: 2
