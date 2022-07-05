@@ -309,3 +309,5 @@ standalone/config/fns-debug.yaml
 graph_sql
 /standalone/config/fns-debug.yaml
 /standalone/config/fns-test.yaml
+/cluster/users/config/fns-test.yaml
+/cluster/posts/config/fns-test.yaml
