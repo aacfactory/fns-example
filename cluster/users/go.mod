@@ -8,13 +8,13 @@ require (
 	github.com/aacfactory/fns-contrib/authorizations/encoding/jwt v0.12.4
 	github.com/aacfactory/fns-contrib/databases/postgres v0.12.4
 	github.com/aacfactory/fns-contrib/databases/sql v0.12.4
+	github.com/aacfactory/json v1.12.1
 	github.com/lib/pq v1.10.6
 )
 
 require (
 	github.com/aacfactory/afssl v1.5.0 // indirect
 	github.com/aacfactory/configures v1.12.1 // indirect
-	github.com/aacfactory/json v1.12.1 // indirect
 	github.com/aacfactory/logs v1.12.1 // indirect
 	github.com/aacfactory/workers v1.4.0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
