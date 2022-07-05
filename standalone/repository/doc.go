@@ -4,3 +4,7 @@
 // write data repository here
 // see https://github.com/aacfactory/fns-contrib/tree/main/databases/sql
 package repository
+
+import (
+	_ "github.com/aacfactory/fns-contrib/databases/postgres"
+)
