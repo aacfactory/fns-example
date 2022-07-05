@@ -132,30 +132,7 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 func (svc *_service_) Document() (doc service.Document) {
 	sd := documents.NewService(_name, "User service")
 	sd.AddFn(
-		"create", "Create user", "Create a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_create_failed      | 500     | create user failed            |", false, false,
-		documents.Struct("main/modules/users", "CreateArgument", "Create user argument", "Create user argument").
-			AddProperty("nickname",
-				documents.String().SetTitle("Nickname").SetDescription("Nickname"),
-			).
-			AddProperty("mobile",
-				documents.String().SetTitle("Mobile").SetDescription("Mobile"),
-			).
-			AddProperty("gender",
-				documents.String().SetTitle("Gender").SetDescription("Gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
-			).
-			AddProperty("birthday",
-				documents.Date().SetTitle("Birthday").SetDescription("Birthday").AsRequired(`validate:"required" message:"birthday is invalid"`),
-			),
-		documents.Struct("main/modules/users", "CreateResult", "Create user result", "Create user result").
-			AddProperty("id",
-				documents.String().SetTitle("id").SetDescription("user id"),
-			).
-			AddProperty("token",
-				documents.String().SetTitle("token").SetDescription("user token"),
-			),
-	)
-	sd.AddFn(
-		"get", "Get", "Get a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_get_failed         | 500     | get user failed            |\n| users_get_nothing         | 404     | user was not found            |", false, false,
+		"get", "Get", "Get a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_get_failed         | 500     | get user failed            |\n| users_get_nothing        | 404     | user was not found            |", false, false,
 		documents.Struct("main/modules/users", "GetArgument", "Get user argument", "Get user argument").
 			AddProperty("id",
 				documents.String().SetTitle("Id").SetDescription("Id").AsRequired(`validate:"required" message:"id is invalid"`),
@@ -196,6 +173,29 @@ func (svc *_service_) Document() (doc service.Document) {
 					AddProperty("url",
 						documents.String().SetTitle("url").SetDescription("full url"),
 					).SetTitle("user avatar").SetDescription("user avatar"),
+			),
+	)
+	sd.AddFn(
+		"create", "Create user", "Create a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_create_failed      | 500     | create user failed            |", false, false,
+		documents.Struct("main/modules/users", "CreateArgument", "Create user argument", "Create user argument").
+			AddProperty("nickname",
+				documents.String().SetTitle("Nickname").SetDescription("Nickname"),
+			).
+			AddProperty("mobile",
+				documents.String().SetTitle("Mobile").SetDescription("Mobile"),
+			).
+			AddProperty("gender",
+				documents.String().SetTitle("Gender").SetDescription("Gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
+			).
+			AddProperty("birthday",
+				documents.Date().SetTitle("Birthday").SetDescription("Birthday").AsRequired(`validate:"required" message:"birthday is invalid"`),
+			),
+		documents.Struct("main/modules/users", "CreateResult", "Create user result", "Create user result").
+			AddProperty("id",
+				documents.String().SetTitle("id").SetDescription("user id"),
+			).
+			AddProperty("token",
+				documents.String().SetTitle("token").SetDescription("user token"),
 			),
 	)
 	doc = sd

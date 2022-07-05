@@ -21,14 +21,14 @@ const (
 	_listFn          = "list"
 )
 
-func Create(ctx context.Context, argument CreateArgument) (result *Post, err errors.CodeError) {
+func Create(ctx context.Context, argument CreateArgument) (result *CreateResult, err errors.CodeError) {
 	endpoint, hasEndpoint := service.GetEndpoint(ctx, _name)
 	if !hasEndpoint {
 		err = errors.NotFound("endpoint was not found").WithMeta("name", _name)
 		return
 	}
 	fr := endpoint.Request(ctx, _createFn, service.NewArgument(argument))
-	handled := Post{}
+	handled := CreateResult{}
 	hasResult, handleErr := fr.Get(ctx, &handled)
 	if handleErr != nil {
 		err = handleErr
@@ -40,14 +40,14 @@ func Create(ctx context.Context, argument CreateArgument) (result *Post, err err
 	return
 }
 
-func CreateComment(ctx context.Context, argument CreateCommentArgument) (result *Comment, err errors.CodeError) {
+func CreateComment(ctx context.Context, argument CreateCommentArgument) (result *CreateCommentResult, err errors.CodeError) {
 	endpoint, hasEndpoint := service.GetEndpoint(ctx, _name)
 	if !hasEndpoint {
 		err = errors.NotFound("endpoint was not found").WithMeta("name", _name)
 		return
 	}
 	fr := endpoint.Request(ctx, _createCommentFn, service.NewArgument(argument))
-	handled := Comment{}
+	handled := CreateCommentResult{}
 	hasResult, handleErr := fr.Get(ctx, &handled)
 	if handleErr != nil {
 		err = handleErr
@@ -253,6 +253,20 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 func (svc *_service_) Document() (doc service.Document) {
 	sd := documents.NewService(_name, "Post service")
 	sd.AddFn(
+		"create_comment", "Create post comment", "Create a post comment\n----------\nerrors:\n| Name                           | Code    | Description                   |\n|--------------------------------|---------|-------------------------------|\n| posts_create_comment_failed    | 500     | create post comment failed    |", true, false,
+		documents.Struct("main/modules/posts", "CreateCommentArgument", "Create post comment argument", "Create post comment argument").
+			AddProperty("postId",
+				documents.String().SetTitle("post id").SetDescription("post id").AsRequired(`validate:"required" message:"postId is invalid"`),
+			).
+			AddProperty("content",
+				documents.String().SetTitle("content").SetDescription("content").AsRequired(`validate:"required" message:"content is invalid"`),
+			),
+		documents.Struct("main/modules/posts", "CreateCommentResult", "Create post comment result", "Create post comment result").
+			AddProperty("id",
+				documents.Int().SetTitle("post comment id").SetDescription("post comment id"),
+			),
+	)
+	sd.AddFn(
 		"create", "Create post", "Create a post\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| posts_create_failed      | 500     | create post failed            |", true, false,
 		documents.Struct("main/modules/posts", "CreateArgument", "Create post argument", "Create post argument").
 			AddProperty("title",
@@ -261,129 +275,21 @@ func (svc *_service_) Document() (doc service.Document) {
 			AddProperty("content",
 				documents.String().SetTitle("post content").SetDescription("post content").AsRequired(`validate:"required" message:"content is invalid"`),
 			),
-		documents.Struct("main/modules/posts", "Post", "post", "post").
+		documents.Struct("main/modules/posts", "CreateResult", "Create post result", "Create post result").
 			AddProperty("id",
-				documents.String().SetTitle("id").SetDescription("id"),
-			).
-			AddProperty("user",
-				documents.Struct("main/modules/users", "User", "User", "User model").
-					AddProperty("id",
-						documents.String().SetTitle("Id").SetDescription("Id"),
-					).
-					AddProperty("createAt",
-						documents.DateTime().SetTitle("create time").SetDescription("create time"),
-					).
-					AddProperty("nickname",
-						documents.String().SetTitle("nickname").SetDescription("nickname"),
-					).
-					AddProperty("mobile",
-						documents.String().SetTitle("mobile").SetDescription("mobile"),
-					).
-					AddProperty("gender",
-						documents.String().SetTitle("gender").SetDescription("gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
-					).
-					AddProperty("birthday",
-						documents.Date().SetTitle("birthday").SetDescription("birthday"),
-					).
-					AddProperty("avatar",
-						documents.Struct("main/repository", "Avatar", "Avatar", "Avatar info").
-							AddProperty("schema",
-								documents.String().SetTitle("http schema").SetDescription("http schema"),
-							).
-							AddProperty("domain",
-								documents.String().SetTitle("domain").SetDescription("domain"),
-							).
-							AddProperty("path",
-								documents.String().SetTitle("uri path").SetDescription("uri path"),
-							).
-							AddProperty("mimeType",
-								documents.String().SetTitle("mime type").SetDescription("mime type"),
-							).
-							AddProperty("url",
-								documents.String().SetTitle("url").SetDescription("full url"),
-							).SetTitle("user avatar").SetDescription("user avatar"),
-					).SetTitle("author").SetDescription("author"),
-			).
-			AddProperty("createAt",
-				documents.DateTime().SetTitle("create time").SetDescription("create time"),
-			).
-			AddProperty("title",
-				documents.String().SetTitle("title").SetDescription("title"),
-			).
-			AddProperty("content",
-				documents.String().SetTitle("content").SetDescription("content"),
-			).
-			AddProperty("comments",
-				documents.Array(
-					"", "", "",
-					documents.Struct("main/modules/posts", "Comment", "comment", "comment").
-						AddProperty("id",
-							documents.Int().SetTitle("id").SetDescription("id"),
-						).
-						AddProperty("postId",
-							documents.String().SetTitle("post id").SetDescription("post id"),
-						).
-						AddProperty("user",
-							documents.Struct("main/modules/users", "User", "User", "User model").
-								AddProperty("id",
-									documents.String().SetTitle("Id").SetDescription("Id"),
-								).
-								AddProperty("createAt",
-									documents.DateTime().SetTitle("create time").SetDescription("create time"),
-								).
-								AddProperty("nickname",
-									documents.String().SetTitle("nickname").SetDescription("nickname"),
-								).
-								AddProperty("mobile",
-									documents.String().SetTitle("mobile").SetDescription("mobile"),
-								).
-								AddProperty("gender",
-									documents.String().SetTitle("gender").SetDescription("gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
-								).
-								AddProperty("birthday",
-									documents.Date().SetTitle("birthday").SetDescription("birthday"),
-								).
-								AddProperty("avatar",
-									documents.Struct("main/repository", "Avatar", "Avatar", "Avatar info").
-										AddProperty("schema",
-											documents.String().SetTitle("http schema").SetDescription("http schema"),
-										).
-										AddProperty("domain",
-											documents.String().SetTitle("domain").SetDescription("domain"),
-										).
-										AddProperty("path",
-											documents.String().SetTitle("uri path").SetDescription("uri path"),
-										).
-										AddProperty("mimeType",
-											documents.String().SetTitle("mime type").SetDescription("mime type"),
-										).
-										AddProperty("url",
-											documents.String().SetTitle("url").SetDescription("full url"),
-										).SetTitle("user avatar").SetDescription("user avatar"),
-								).SetTitle("author").SetDescription("author"),
-						).
-						AddProperty("createAt",
-							documents.DateTime().SetTitle("create time").SetDescription("create time"),
-						).
-						AddProperty("content",
-							documents.String().SetTitle("content").SetDescription("content"),
-						),
-				).SetTitle("comments").SetDescription("latest 10 comments"),
-			).
-			AddProperty("likes",
-				documents.Int().SetTitle("likes").SetDescription("likes num"),
+				documents.String().SetTitle("post id").SetDescription("post id"),
 			),
 	)
 	sd.AddFn(
-		"like", "Create post like", "Create a post like\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| posts_like_failed      | 500     | create post like failed            |", true, false,
-		documents.Struct("main/modules/posts", "CreateLikeArgument", "Create post like Argument", "Create post like Argument").
+		"like", "Create post like", "Create a post like\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| posts_like_failed        | 500     | create post like failed       |", true, false,
+		documents.Struct("main/modules/posts", "CreateLikeArgument", "Create post like argument", "Create post like argument").
 			AddProperty("postId",
 				documents.String().SetTitle("post id").SetDescription("post id").AsRequired(`validate:"required" message:"postId is invalid"`),
 			),
 		documents.Struct("github.com/aacfactory/fns/service", "Empty", "", "Empty"),
 	)
 	sd.AddFn(
-		"list", "List", "List posts\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| posts_list_failed      | 500     | list posts failed            |", false, false,
+		"list", "List", "List posts\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| posts_list_failed        | 500     | list posts failed             |", false, false,
 		documents.Struct("main/modules/posts", "ListArgument", "List posts argument", "List argument").
 			AddProperty("offset",
 				documents.Int(),
@@ -506,68 +412,6 @@ func (svc *_service_) Document() (doc service.Document) {
 					documents.Int().SetTitle("likes").SetDescription("likes num"),
 				),
 		),
-	)
-	sd.AddFn(
-		"create_comment", "Create post comment", "Create a post comment\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| posts_create_comment_failed      | 500     | create post comment failed            |", true, false,
-		documents.Struct("main/modules/posts", "CreateCommentArgument", "Create post comment Argument", "Create post comment Argument").
-			AddProperty("postId",
-				documents.String().SetTitle("post id").SetDescription("post id").AsRequired(`validate:"required" message:"postId is invalid"`),
-			).
-			AddProperty("content",
-				documents.String().SetTitle("content").SetDescription("content").AsRequired(`validate:"required" message:"content is invalid"`),
-			),
-		documents.Struct("main/modules/posts", "Comment", "comment", "comment").
-			AddProperty("id",
-				documents.Int().SetTitle("id").SetDescription("id"),
-			).
-			AddProperty("postId",
-				documents.String().SetTitle("post id").SetDescription("post id"),
-			).
-			AddProperty("user",
-				documents.Struct("main/modules/users", "User", "User", "User model").
-					AddProperty("id",
-						documents.String().SetTitle("Id").SetDescription("Id"),
-					).
-					AddProperty("createAt",
-						documents.DateTime().SetTitle("create time").SetDescription("create time"),
-					).
-					AddProperty("nickname",
-						documents.String().SetTitle("nickname").SetDescription("nickname"),
-					).
-					AddProperty("mobile",
-						documents.String().SetTitle("mobile").SetDescription("mobile"),
-					).
-					AddProperty("gender",
-						documents.String().SetTitle("gender").SetDescription("gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
-					).
-					AddProperty("birthday",
-						documents.Date().SetTitle("birthday").SetDescription("birthday"),
-					).
-					AddProperty("avatar",
-						documents.Struct("main/repository", "Avatar", "Avatar", "Avatar info").
-							AddProperty("schema",
-								documents.String().SetTitle("http schema").SetDescription("http schema"),
-							).
-							AddProperty("domain",
-								documents.String().SetTitle("domain").SetDescription("domain"),
-							).
-							AddProperty("path",
-								documents.String().SetTitle("uri path").SetDescription("uri path"),
-							).
-							AddProperty("mimeType",
-								documents.String().SetTitle("mime type").SetDescription("mime type"),
-							).
-							AddProperty("url",
-								documents.String().SetTitle("url").SetDescription("full url"),
-							).SetTitle("user avatar").SetDescription("user avatar"),
-					).SetTitle("author").SetDescription("author"),
-			).
-			AddProperty("createAt",
-				documents.DateTime().SetTitle("create time").SetDescription("create time"),
-			).
-			AddProperty("content",
-				documents.String().SetTitle("content").SetDescription("content"),
-			),
 	)
 	doc = sd
 	return
