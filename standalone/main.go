@@ -8,6 +8,8 @@ import (
 )
 
 var (
+	// Version
+	// go build -ldflags "-X main.Version=${VERSION}" -o standalone
 	Version string = "v0.0.1"
 )
 
