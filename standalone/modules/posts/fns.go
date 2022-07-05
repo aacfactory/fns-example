@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns/endpoints/authorizations"
 	"github.com/aacfactory/fns/service"
 	"github.com/aacfactory/fns/service/documents"
@@ -135,7 +135,7 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 			return
 		}
 		// sql begin transaction
-		beginTransactionErr := sql.BeginTransaction(ctx)
+		beginTransactionErr := postgres.BeginTransaction(ctx)
 		if beginTransactionErr != nil {
 			err = errors.ServiceError("posts: begin sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createFn).WithCause(beginTransactionErr)
 			return
@@ -144,10 +144,10 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 		v, err = create(ctx, arg)
 		// sql close transaction
 		if err == nil {
-			commitTransactionErr := sql.CommitTransaction(ctx)
+			commitTransactionErr := postgres.CommitTransaction(ctx)
 			if commitTransactionErr != nil {
 				err = errors.ServiceError("posts: commit sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createFn).WithCause(commitTransactionErr)
-				_ = sql.RollbackTransaction(ctx)
+				_ = postgres.RollbackTransaction(ctx)
 				return
 			}
 		}
@@ -172,7 +172,7 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 			return
 		}
 		// sql begin transaction
-		beginTransactionErr := sql.BeginTransaction(ctx)
+		beginTransactionErr := postgres.BeginTransaction(ctx)
 		if beginTransactionErr != nil {
 			err = errors.ServiceError("posts: begin sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createCommentFn).WithCause(beginTransactionErr)
 			return
@@ -181,10 +181,10 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 		v, err = createComment(ctx, arg)
 		// sql close transaction
 		if err == nil {
-			commitTransactionErr := sql.CommitTransaction(ctx)
+			commitTransactionErr := postgres.CommitTransaction(ctx)
 			if commitTransactionErr != nil {
 				err = errors.ServiceError("posts: commit sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createCommentFn).WithCause(commitTransactionErr)
-				_ = sql.RollbackTransaction(ctx)
+				_ = postgres.RollbackTransaction(ctx)
 				return
 			}
 		}
@@ -209,7 +209,7 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 			return
 		}
 		// sql begin transaction
-		beginTransactionErr := sql.BeginTransaction(ctx)
+		beginTransactionErr := postgres.BeginTransaction(ctx)
 		if beginTransactionErr != nil {
 			err = errors.ServiceError("posts: begin sql transaction failed").WithMeta("service", _name).WithMeta("fn", _likeFn).WithCause(beginTransactionErr)
 			return
@@ -218,10 +218,10 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 		v, err = createLike(ctx, arg)
 		// sql close transaction
 		if err == nil {
-			commitTransactionErr := sql.CommitTransaction(ctx)
+			commitTransactionErr := postgres.CommitTransaction(ctx)
 			if commitTransactionErr != nil {
 				err = errors.ServiceError("posts: commit sql transaction failed").WithMeta("service", _name).WithMeta("fn", _likeFn).WithCause(commitTransactionErr)
-				_ = sql.RollbackTransaction(ctx)
+				_ = postgres.RollbackTransaction(ctx)
 				return
 			}
 		}

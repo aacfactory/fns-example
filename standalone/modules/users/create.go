@@ -56,7 +56,7 @@ type CreateResult struct {
 // @authorization false
 // @permission false
 // @internal false
-// @transactional sql
+// @transactional postgres
 // @title Create user
 // @description >>>
 // Create a user

@@ -6,7 +6,7 @@ import (
 	"context"
 
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns/service"
 	"github.com/aacfactory/fns/service/documents"
 	"github.com/aacfactory/fns/service/validators"
@@ -88,7 +88,7 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 			return
 		}
 		// sql begin transaction
-		beginTransactionErr := sql.BeginTransaction(ctx)
+		beginTransactionErr := postgres.BeginTransaction(ctx)
 		if beginTransactionErr != nil {
 			err = errors.ServiceError("users: begin sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createFn).WithCause(beginTransactionErr)
 			return
@@ -97,10 +97,10 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 		v, err = create(ctx, arg)
 		// sql close transaction
 		if err == nil {
-			commitTransactionErr := sql.CommitTransaction(ctx)
+			commitTransactionErr := postgres.CommitTransaction(ctx)
 			if commitTransactionErr != nil {
 				err = errors.ServiceError("users: commit sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createFn).WithCause(commitTransactionErr)
-				_ = sql.RollbackTransaction(ctx)
+				_ = postgres.RollbackTransaction(ctx)
 				return
 			}
 		}
@@ -131,6 +131,29 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 
 func (svc *_service_) Document() (doc service.Document) {
 	sd := documents.NewService(_name, "User service")
+	sd.AddFn(
+		"create", "Create user", "Create a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_create_failed      | 500     | create user failed            |", false, false,
+		documents.Struct("main/modules/users", "CreateArgument", "Create user argument", "Create user argument").
+			AddProperty("nickname",
+				documents.String().SetTitle("Nickname").SetDescription("Nickname"),
+			).
+			AddProperty("mobile",
+				documents.String().SetTitle("Mobile").SetDescription("Mobile"),
+			).
+			AddProperty("gender",
+				documents.String().SetTitle("Gender").SetDescription("Gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
+			).
+			AddProperty("birthday",
+				documents.Date().SetTitle("Birthday").SetDescription("Birthday").AsRequired(`validate:"required" message:"birthday is invalid"`),
+			),
+		documents.Struct("main/modules/users", "CreateResult", "Create user result", "Create user result").
+			AddProperty("id",
+				documents.String().SetTitle("id").SetDescription("user id"),
+			).
+			AddProperty("token",
+				documents.String().SetTitle("token").SetDescription("user token"),
+			),
+	)
 	sd.AddFn(
 		"get", "Get", "Get a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_get_failed         | 500     | get user failed            |\n| users_get_nothing        | 404     | user was not found            |", false, false,
 		documents.Struct("main/modules/users", "GetArgument", "Get user argument", "Get user argument").
@@ -173,29 +196,6 @@ func (svc *_service_) Document() (doc service.Document) {
 					AddProperty("url",
 						documents.String().SetTitle("url").SetDescription("full url"),
 					).SetTitle("user avatar").SetDescription("user avatar"),
-			),
-	)
-	sd.AddFn(
-		"create", "Create user", "Create a user\n----------\nerrors:\n| Name                     | Code    | Description                   |\n|--------------------------|---------|-------------------------------|\n| users_create_failed      | 500     | create user failed            |", false, false,
-		documents.Struct("main/modules/users", "CreateArgument", "Create user argument", "Create user argument").
-			AddProperty("nickname",
-				documents.String().SetTitle("Nickname").SetDescription("Nickname"),
-			).
-			AddProperty("mobile",
-				documents.String().SetTitle("Mobile").SetDescription("Mobile"),
-			).
-			AddProperty("gender",
-				documents.String().SetTitle("Gender").SetDescription("Gender").AddEnum("F(female)", "M(male)", "N(unknown)"),
-			).
-			AddProperty("birthday",
-				documents.Date().SetTitle("Birthday").SetDescription("Birthday").AsRequired(`validate:"required" message:"birthday is invalid"`),
-			),
-		documents.Struct("main/modules/users", "CreateResult", "Create user result", "Create user result").
-			AddProperty("id",
-				documents.String().SetTitle("id").SetDescription("user id"),
-			).
-			AddProperty("token",
-				documents.String().SetTitle("token").SetDescription("user token"),
 			),
 	)
 	doc = sd

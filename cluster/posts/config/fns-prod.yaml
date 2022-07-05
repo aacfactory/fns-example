@@ -13,13 +13,3 @@ cluster:
   options:
     members:
     - ip:port
-sql:
-  driver: postgres
-  masterSlaverMode: false
-  dsn:
-  - dsn
-  maxIdles: 8
-  maxOpens: 64
-  enableDebugLog: false
-  gtmCleanUpSecond: 60
-  isolation: 2

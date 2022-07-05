@@ -25,7 +25,7 @@ type CreateLikeArgument struct {
 // @authorization true
 // @permission false
 // @internal false
-// @transactional sql
+// @transactional postgres
 // @title Create post like
 // @description >>>
 // Create a post like

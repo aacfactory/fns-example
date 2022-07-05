@@ -6,6 +6,7 @@ import (
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns-example/cluster/posts/repository"
+	"github.com/aacfactory/fns-example/cluster/users/modules/users"
 	"github.com/aacfactory/fns/commons/uid"
 	"github.com/aacfactory/fns/service"
 	"time"
@@ -62,9 +63,19 @@ func create(ctx context.Context, argument CreateArgument) (result *CreateResult,
 		return
 	}
 	userId := request.User().Id()
+	user, getUserErr := users.Get(ctx, users.GetArgument{
+		Id: userId,
+	})
+	if getUserErr != nil {
+		err = errors.ServiceError("posts_create_failed").WithCause(getUserErr)
+		if log.DebugEnabled() {
+			log.Debug().Caller().Message(fmt.Sprintf("%+v", err))
+		}
+		return
+	}
 	row := repository.PostRow{
 		Id:       uid.UID(),
-		UserId:   userId,
+		UserId:   user.Id,
 		CreateAT: time.Now(),
 		Version:  0,
 		Title:    argument.Title,

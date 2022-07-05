@@ -40,7 +40,7 @@ type CreateCommentResult struct {
 // @authorization true
 // @permission false
 // @internal false
-// @transactional sql
+// @transactional postgres
 // @title Create post comment
 // @description >>>
 // Create a post comment
