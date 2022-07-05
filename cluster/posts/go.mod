@@ -3,10 +3,12 @@ module github.com/aacfactory/fns-example/cluster/posts
 go 1.18
 
 require (
+	github.com/aacfactory/copier v1.1.0
 	github.com/aacfactory/errors v1.12.0
 	github.com/aacfactory/fns v0.12.4
-	github.com/aacfactory/fns-contrib/databases/postgres v0.12.3
+	github.com/aacfactory/fns-contrib/databases/postgres v0.12.4
 	github.com/aacfactory/fns-contrib/databases/sql v0.12.4
+	github.com/aacfactory/fns-example/cluster/users v0.0.0-20220705055331-666589cd351e
 	github.com/lib/pq v1.10.6
 )
 
@@ -40,7 +42,7 @@ require (
 	go.uber.org/automaxprocs v1.5.1 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
-	golang.org/x/sys v0.0.0-20220701225701-179beb0bd1a1 // indirect
+	golang.org/x/sys v0.0.0-20220704084225-05e143d24a9e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 )

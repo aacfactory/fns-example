@@ -3,7 +3,7 @@
 package modules
 
 import (
-	"github.com/aacfactory/fns-example/cluster/posts/modules/examples"
+	"github.com/aacfactory/fns-example/cluster/posts/modules/posts"
 	"github.com/aacfactory/fns/service"
 )
 
@@ -14,7 +14,7 @@ func Services() (services []service.Service) {
 	)
 	services = append(
 		services,
-		examples.Service(),
+		posts.Service(),
 	)
 	return
 }
