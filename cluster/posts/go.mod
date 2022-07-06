@@ -4,16 +4,15 @@ go 1.18
 
 require (
 	github.com/aacfactory/errors v1.12.0
-	github.com/aacfactory/fns v0.12.4
-	github.com/aacfactory/fns-contrib/databases/postgres v0.12.4
+	github.com/aacfactory/fns v0.12.5
+	github.com/aacfactory/fns-contrib/databases/postgres v0.12.5
 	github.com/aacfactory/fns-example/cluster/users v0.0.0-20220705055331-666589cd351e
-	github.com/lib/pq v1.10.6
 )
 
 require (
 	github.com/aacfactory/afssl v1.5.0 // indirect
 	github.com/aacfactory/configures v1.12.1 // indirect
-	github.com/aacfactory/fns-contrib/databases/sql v0.12.4 // indirect
+	github.com/aacfactory/fns-contrib/databases/sql v0.12.5 // indirect
 	github.com/aacfactory/json v1.12.1 // indirect
 	github.com/aacfactory/logs v1.12.1 // indirect
 	github.com/aacfactory/workers v1.4.0 // indirect

@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/aacfactory/copier v1.1.0
 	github.com/aacfactory/errors v1.12.0
-	github.com/aacfactory/fns v0.12.4
-	github.com/aacfactory/fns-contrib/authorizations/encoding/jwt v0.12.4
-	github.com/aacfactory/fns-contrib/databases/postgres v0.12.4
-	github.com/aacfactory/fns-contrib/databases/sql v0.12.4
+	github.com/aacfactory/fns v0.12.5
+	github.com/aacfactory/fns-contrib/authorizations/encoding/jwt v0.12.5
+	github.com/aacfactory/fns-contrib/databases/postgres v0.12.5
+	github.com/aacfactory/fns-contrib/databases/sql v0.12.5
 	github.com/aacfactory/json v1.12.1
 	github.com/lib/pq v1.10.6
 )
