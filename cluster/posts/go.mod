@@ -2,21 +2,24 @@ module github.com/aacfactory/fns-example/cluster/posts
 
 go 1.18
 
+replace github.com/aacfactory/fns v0.12.5 => ../../../fns
+
 require (
 	github.com/aacfactory/errors v1.12.0
 	github.com/aacfactory/fns v0.12.5
 	github.com/aacfactory/fns-contrib/databases/postgres v0.12.5
+	github.com/aacfactory/fns-contrib/databases/sql v0.12.5
 	github.com/aacfactory/fns-example/cluster/users v0.0.0-20220705055331-666589cd351e
 )
 
 require (
 	github.com/aacfactory/afssl v1.5.0 // indirect
 	github.com/aacfactory/configures v1.12.1 // indirect
-	github.com/aacfactory/fns-contrib/databases/sql v0.12.5 // indirect
 	github.com/aacfactory/json v1.12.1 // indirect
 	github.com/aacfactory/logs v1.12.1 // indirect
 	github.com/aacfactory/workers v1.4.0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/fasthttp/websocket v1.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
@@ -31,6 +34,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/rs/xid v1.4.0 // indirect
 	github.com/rs/zerolog v1.27.0 // indirect
+	github.com/savsgio/gotils v0.0.0-20211223103454-d0aaa54c5899 // indirect
 	github.com/tidwall/gjson v1.14.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect

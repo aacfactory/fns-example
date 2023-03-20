@@ -4,9 +4,9 @@ package posts
 
 import (
 	"context"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
 
 	"github.com/aacfactory/errors"
+	"github.com/aacfactory/fns-contrib/databases/sql"
 	"github.com/aacfactory/fns/endpoints/authorizations"
 	"github.com/aacfactory/fns/service"
 	"github.com/aacfactory/fns/service/documents"
@@ -75,7 +75,7 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 			return
 		}
 		// sql begin transaction
-		beginTransactionErr := postgres.BeginTransaction(ctx)
+		beginTransactionErr := sql.BeginTransaction(ctx)
 		if beginTransactionErr != nil {
 			err = errors.ServiceError("posts: begin sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createFn).WithCause(beginTransactionErr)
 			return
@@ -84,16 +84,20 @@ func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Ar
 		v, err = create(ctx, arg)
 		// sql close transaction
 		if err == nil {
-			commitTransactionErr := postgres.CommitTransaction(ctx)
+			commitTransactionErr := sql.CommitTransaction(ctx)
 			if commitTransactionErr != nil {
 				err = errors.ServiceError("posts: commit sql transaction failed").WithMeta("service", _name).WithMeta("fn", _createFn).WithCause(commitTransactionErr)
-				_ = postgres.RollbackTransaction(ctx)
+				_ = sql.RollbackTransaction(ctx)
 				return
 			}
 		}
+		v, err = svc.Barrier(ctx, _createFn, argument, func() (v interface{}, err errors.CodeError) {
+
+			return
+		})
 		break
 	default:
-		err = errors.NotFound("posts: fn was not found").WithMeta("service", _name).WithMeta("fn", fn)
+		err = errors.Warning("posts: fn was not found").WithMeta("service", _name).WithMeta("fn", fn)
 		break
 	}
 	return

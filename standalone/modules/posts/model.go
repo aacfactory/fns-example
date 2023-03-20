@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+// Posts
+// @title post list
+// @description post list
+type Posts []*Post
+
 // Post
 // @title post
 // @description post

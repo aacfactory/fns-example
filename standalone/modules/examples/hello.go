@@ -3,52 +3,46 @@ package examples
 import (
 	"context"
 	"fmt"
-
 	"github.com/aacfactory/errors"
 )
 
 // HelloArgument
-// @title Hello Argument
-// @description Hello Argument
+// @title Hello function argument
+// @description Hello function argument
 type HelloArgument struct {
-	// Name
+	// World
 	// @title Name
 	// @description Name
-	Name string `json:"name" message:"name is required" validate:"required"`
+	// @validate-message-i18n >>>
+	// zh: 世界是必须的
+	// en: world is required
+	// <<<
+	World string `json:"world" validate:"required" validate-message:"world_required"`
 }
 
-// HelloResult
-// @title Hello Result
-// @description Hello Result
-type HelloResult struct {
-	// Name
-	// @title Name
-	// @description Name
-	Name string `json:"name"`
-}
+// HelloResults
+// @title Hello Results
+// @description Hello Results
+type HelloResults []string
 
 // hello
 // @fn hello
-// @validate true
-// @authorization false
-// @permission false
-// @internal false
+// @timeout 1s
+// @barrier
 // @title Hello
-// @description >>>
-// Hello Fn
-// ----------
-// errors:
-// | Name                     | Code    | Description                   |
-// |--------------------------|---------|-------------------------------|
-// | examples_hello_failed    | 500     | hello failed                  |
+// @errors >>>
+// + examples_hello_failed
+// 	- zh: 错误
+//	- en: failed
 // <<<
-func hello(ctx context.Context, argument HelloArgument) (result *HelloResult, err errors.CodeError) {
-	if argument.Name == "error" {
+// @description >>>
+// Hello
+// <<<
+func hello(ctx context.Context, argument HelloArgument) (result HelloResults, err errors.CodeError) {
+	if argument.World == "error" {
 		err = errors.ServiceError("examples_hello_failed")
 		return
 	}
-	result = &HelloResult{
-		Name: fmt.Sprintf("hello %s!", argument.Name),
-	}
+	result = HelloResults{fmt.Sprintf("hello %s!", argument.World)}
 	return
 }

@@ -3,22 +3,23 @@
 package modules
 
 import (
-	"github.com/aacfactory/fns-example/standalone/modules/examples"
-	"github.com/aacfactory/fns-example/standalone/modules/posts"
-	"github.com/aacfactory/fns-example/standalone/modules/users"
+	"github.com/aacfactory/fns-contrib/databases/sql"
 	"github.com/aacfactory/fns/service"
+	_ "github.com/lib/pq"
 )
 
-func Services() (services []service.Service) {
-	services = append(
-		services,
-		dependencies()...,
+func Services() (v []service.Service) {
+	v = append(
+		dependencies(),
+		services()...,
 	)
-	services = append(
-		services,
-		examples.Service(),
-		posts.Service(),
-		users.Service(),
-	)
+	return
+}
+
+func dependencies() (v []service.Service) {
+	v = []service.Service{
+		// add dependencies here
+		sql.Service(),
+	}
 	return
 }

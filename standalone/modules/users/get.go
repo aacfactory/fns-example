@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-contrib/databases/sql/dal"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/fns/service"
 	"github.com/aacfactory/json"
 )
@@ -22,27 +23,24 @@ type GetArgument struct {
 
 // get
 // @fn get
-// @validate true
-// @authorization false
-// @permission false
-// @internal false
+// @validation
+// @errors >>>
+// + users_get_failed
+//   - en: users get failed
+//
+// + users_get_nothing
+//   - en: users get nothing
+//
+// <<<
 // @title Get
 // @description >>>
 // Get a user
-// ----------
-// errors:
-// | Name                     | Code    | Description                   |
-// |--------------------------|---------|-------------------------------|
-// | users_get_failed         | 500     | get user failed            |
-// | users_get_nothing        | 404     | user was not found            |
 // <<<
-func get(ctx context.Context, argument GetArgument) (result *User, err errors.CodeError) {
+func get(ctx context.Context, argument GetArgument) (result User, err errors.CodeError) {
 	log := service.GetLog(ctx)
-	row := repository.UserRow{}
-	fetched, queryErr := postgres.QueryOne(
+	row, queryErr := dal.QueryOne[*postgres.UserRow](
 		ctx,
-		postgres.NewConditions(postgres.Eq("ID", argument.Id)),
-		&row,
+		dal.NewConditions(dal.Eq("ID", argument.Id)).And(dal.Eq("BD", sql.NewDate(2022, 1, 1))).And(dal.Eq("BT", sql.NewTime(10, 12, 59))),
 	)
 	if queryErr != nil {
 		if log.ErrorEnabled() {
@@ -54,14 +52,15 @@ func get(ctx context.Context, argument GetArgument) (result *User, err errors.Co
 		}
 		return
 	}
-	if !fetched {
+	if row == nil {
 		err = errors.NotFound("users_get_nothing").WithMeta("id", argument.Id)
 		if log.DebugEnabled() {
 			log.Debug().Caller().Message(fmt.Sprintf("%+v", err))
 		}
 		return
 	}
-	result = &User{
+	log.Debug().Message(fmt.Sprintf("--------%s---%v---%v", row.Id, row.BD, row.BT))
+	result = User{
 		Id:       row.Id,
 		CreateAT: row.CreateAT,
 		Nickname: row.Nickname,

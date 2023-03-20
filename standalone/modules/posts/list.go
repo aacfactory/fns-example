@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/aacfactory/copier"
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-contrib/databases/sql/dal"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/fns/service"
 )
 
@@ -20,28 +20,24 @@ type ListArgument struct {
 
 // list
 // @fn list
-// @validate true
-// @authorization false
-// @permission false
-// @internal false
+// @validation
+// @barrier
+// @errors >>>
+// + posts_list_failed
+//   - en: posts list failed
+//
+// <<<
 // @title List
 // @description >>>
 // List posts
-// ----------
-// errors:
-// | Name                     | Code    | Description                   |
-// |--------------------------|---------|-------------------------------|
-// | posts_list_failed        | 500     | list posts failed             |
 // <<<
-func list(ctx context.Context, argument ListArgument) (result []*Post, err errors.CodeError) {
+func list(ctx context.Context, argument ListArgument) (result Posts, err errors.CodeError) {
 	log := service.GetLog(ctx)
-	rows := make([]*repository.PostRow, 0, 1)
-	fetched, queryErr := postgres.QueryWithRange(
+	rows, queryErr := dal.QueryWithRange[*postgres.PostRow](
 		ctx,
-		postgres.NewConditions(postgres.NotEq("TITLE", "")),
-		postgres.NewOrders().Desc("ID"),
-		postgres.NewRange(argument.Offset, argument.Length),
-		&rows,
+		dal.NewConditions(dal.NotEq("TITLE", "")),
+		dal.NewOrders().Desc("ID"),
+		dal.NewRange(argument.Offset, argument.Length),
 	)
 	if queryErr != nil {
 		if log.ErrorEnabled() {
@@ -53,10 +49,10 @@ func list(ctx context.Context, argument ListArgument) (result []*Post, err error
 		}
 		return
 	}
-	if !fetched {
+	result = Posts{}
+	if rows == nil || len(rows) == 0 {
 		return
 	}
-
 	result = make([]*Post, 0, len(rows))
 	cpErr := copier.Copy(&result, &rows)
 	if cpErr != nil {

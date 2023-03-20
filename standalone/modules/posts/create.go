@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-contrib/databases/sql/dal"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/fns/commons/uid"
 	"github.com/aacfactory/fns/service"
 	"time"
@@ -37,21 +37,19 @@ type CreateResult struct {
 
 // create
 // @fn create
-// @validate true
-// @authorization true
-// @permission false
-// @internal false
-// @transactional postgres
+// @validation
+// @errors >>>
+// + posts_create_failed
+//   - en: posts create failed
+//
+// <<<
+// @sql postgres
+// @transactional
 // @title Create post
 // @description >>>
 // Create a post
-// ----------
-// errors:
-// | Name                     | Code    | Description                   |
-// |--------------------------|---------|-------------------------------|
-// | posts_create_failed      | 500     | create post failed            |
 // <<<
-func create(ctx context.Context, argument CreateArgument) (result *CreateResult, err errors.CodeError) {
+func create(ctx context.Context, argument CreateArgument) (result CreateResult, err errors.CodeError) {
 	log := service.GetLog(ctx)
 	request, hasRequest := service.GetRequest(ctx)
 	if !hasRequest {
@@ -62,10 +60,10 @@ func create(ctx context.Context, argument CreateArgument) (result *CreateResult,
 		return
 	}
 	userId := request.User().Id()
-	row := repository.PostRow{
+	row := postgres.PostRow{
 		Id: uid.UID(),
-		User: &repository.UserRow{
-			Id: userId,
+		User: &postgres.UserRow{
+			Id: userId.String(),
 		},
 		CreateAT: time.Now(),
 		Version:  0,
@@ -74,7 +72,7 @@ func create(ctx context.Context, argument CreateArgument) (result *CreateResult,
 		Comments: nil,
 		Likes:    0,
 	}
-	insertErr := postgres.Insert(ctx, &row)
+	insertErr := dal.Insert(ctx, &row)
 	if insertErr != nil {
 		if log.ErrorEnabled() {
 			log.Error().Caller().Cause(insertErr).Message("posts: create failed")
@@ -85,7 +83,7 @@ func create(ctx context.Context, argument CreateArgument) (result *CreateResult,
 		}
 		return
 	}
-	result = &CreateResult{
+	result = CreateResult{
 		Id: row.Id,
 	}
 	return

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/aacfactory/fns"
@@ -25,7 +26,7 @@ func main() {
 		}
 	}
 
-	if runErr := app.Run(); runErr != nil {
+	if runErr := app.Run(context.TODO()); runErr != nil {
 		app.Log().Error().Caller().Message(fmt.Sprintf("%+v", runErr))
 	}
 	if app.Log().DebugEnabled() {

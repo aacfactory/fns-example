@@ -1,7 +1,7 @@
 package users
 
 import (
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/json"
 	"time"
 )
@@ -38,5 +38,11 @@ type User struct {
 	// Avatar
 	// @title user avatar
 	// @description user avatar
-	Avatar *repository.Avatar `json:"avatar"`
+	Avatar *postgres.Avatar `json:"avatar"`
+	// User
+	// @title user parent
+	// @description user parent
+	Parent *User `json:"parent"`
+
+	BD json.Date `json:"bd"`
 }

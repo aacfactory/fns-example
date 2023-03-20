@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-contrib/databases/sql/dal"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/fns/service"
 	"time"
 )
@@ -36,21 +36,20 @@ type CreateCommentResult struct {
 
 // createComment
 // @fn create_comment
-// @validate true
-// @authorization true
-// @permission false
-// @internal false
-// @transactional postgres
+// @validation
+// @authorization
+// @errors >>>
+// + posts_create_comment_failed
+//   - en: posts create comment failed
+//
+// <<<
+// @sql postgres
+// @transactional
 // @title Create post comment
 // @description >>>
 // Create a post comment
-// ----------
-// errors:
-// | Name                           | Code    | Description                   |
-// |--------------------------------|---------|-------------------------------|
-// | posts_create_comment_failed    | 500     | create post comment failed    |
 // <<<
-func createComment(ctx context.Context, argument CreateCommentArgument) (result *CreateCommentResult, err errors.CodeError) {
+func createComment(ctx context.Context, argument CreateCommentArgument) (result CreateCommentResult, err errors.CodeError) {
 	log := service.GetLog(ctx)
 	request, hasRequest := service.GetRequest(ctx)
 	if !hasRequest {
@@ -61,16 +60,16 @@ func createComment(ctx context.Context, argument CreateCommentArgument) (result 
 		return
 	}
 	userId := request.User().Id()
-	row := repository.PostCommentRow{
+	row := postgres.PostCommentRow{
 		Id:     0,
 		PostId: argument.PostId,
-		User: &repository.UserRow{
-			Id: userId,
+		User: &postgres.UserRow{
+			Id: userId.String(),
 		},
 		CreateAT: time.Now(),
 		Content:  argument.Content,
 	}
-	insertErr := postgres.Insert(ctx, &row)
+	insertErr := dal.Insert(ctx, &row)
 	if insertErr != nil {
 		if log.ErrorEnabled() {
 			log.Error().Caller().Cause(insertErr).Message("posts: create comment failed")
@@ -81,7 +80,7 @@ func createComment(ctx context.Context, argument CreateCommentArgument) (result 
 		}
 		return
 	}
-	result = &CreateCommentResult{
+	result = CreateCommentResult{
 		Id: row.Id,
 	}
 	return

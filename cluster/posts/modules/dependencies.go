@@ -4,6 +4,6 @@ import (
 	"github.com/aacfactory/fns/service"
 )
 
-func dependencies() (services []service.Service) {
+func dependencies() (v []service.Service) {
 	return
 }

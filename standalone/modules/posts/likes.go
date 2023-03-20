@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-contrib/databases/sql/dal"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/fns/service"
 )
 
@@ -21,21 +21,20 @@ type CreateLikeArgument struct {
 
 // createLike
 // @fn like
-// @validate true
-// @authorization true
-// @permission false
-// @internal false
-// @transactional postgres
+// @validation
+// @authorization
+// @errors >>>
+// + posts_like_failed
+//   - en: posts like failed
+//
+// <<<
+// @sql postgres
+// @transactional
 // @title Create post like
 // @description >>>
 // Create a post like
-// ----------
-// errors:
-// | Name                     | Code    | Description                   |
-// |--------------------------|---------|-------------------------------|
-// | posts_like_failed        | 500     | create post like failed       |
 // <<<
-func createLike(ctx context.Context, argument CreateLikeArgument) (result *service.Empty, err errors.CodeError) {
+func createLike(ctx context.Context, argument CreateLikeArgument) (result service.Empty, err errors.CodeError) {
 	log := service.GetLog(ctx)
 	request, hasRequest := service.GetRequest(ctx)
 	if !hasRequest {
@@ -46,12 +45,12 @@ func createLike(ctx context.Context, argument CreateLikeArgument) (result *servi
 		return
 	}
 	userId := request.User().Id()
-	row := repository.PostLikeRow{
+	row := postgres.PostLikeRow{
 		Id:     0,
 		PostId: argument.PostId,
-		UserId: userId,
+		UserId: userId.String(),
 	}
-	insertErr := postgres.Insert(ctx, &row)
+	insertErr := dal.Insert(ctx, &row)
 	if insertErr != nil {
 		if log.ErrorEnabled() {
 			log.Error().Caller().Cause(insertErr).Message("posts: create comment failed")
@@ -62,6 +61,5 @@ func createLike(ctx context.Context, argument CreateLikeArgument) (result *servi
 		}
 		return
 	}
-	result = &service.Empty{}
 	return
 }

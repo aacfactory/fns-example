@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/postgres"
-	"github.com/aacfactory/fns-example/standalone/repository"
+	"github.com/aacfactory/fns-contrib/databases/sql/dal"
+	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
 	"github.com/aacfactory/fns/commons/uid"
 	"github.com/aacfactory/fns/endpoints/authorizations"
 	"github.com/aacfactory/fns/service"
@@ -52,24 +52,21 @@ type CreateResult struct {
 
 // create
 // @fn create
-// @validate true
-// @authorization false
-// @permission false
-// @internal false
-// @transactional postgres
+// @validation
+// @errors >>>
+// + users_create_failed
+//   - en: users create failed
+//
+// <<<
+// @transactional
 // @title Create user
 // @description >>>
 // Create a user
-// ----------
-// errors:
-// | Name                     | Code    | Description                   |
-// |--------------------------|---------|-------------------------------|
-// | users_create_failed      | 500     | create user failed            |
 // <<<
-func create(ctx context.Context, argument CreateArgument) (result *CreateResult, err errors.CodeError) {
+func create(ctx context.Context, argument CreateArgument) (result CreateResult, err errors.CodeError) {
 	log := service.GetLog(ctx)
 	userId := uid.UID()
-	row := repository.UserRow{
+	row := postgres.UserRow{
 		Id:       userId,
 		CreateBY: userId,
 		CreateAT: time.Now(),
@@ -82,9 +79,9 @@ func create(ctx context.Context, argument CreateArgument) (result *CreateResult,
 		Mobile:   argument.Mobile,
 		Gender:   argument.Gender,
 		Birthday: argument.Birthday.ToTime(),
-		Avatar:   &repository.Avatar{},
+		Avatar:   &postgres.Avatar{},
 	}
-	insertErr := postgres.Insert(ctx, &row)
+	insertErr := dal.Insert(ctx, &row)
 	if insertErr != nil {
 		if log.ErrorEnabled() {
 			log.Error().Caller().Cause(insertErr).Message("users: create failed")
@@ -107,7 +104,7 @@ func create(ctx context.Context, argument CreateArgument) (result *CreateResult,
 		}
 		return
 	}
-	result = &CreateResult{
+	result = CreateResult{
 		Id:    row.Id,
 		Token: token,
 	}
