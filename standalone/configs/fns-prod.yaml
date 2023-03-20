@@ -1,0 +1,8 @@
+log:
+  level: error
+  formatter: json
+runtime:
+  localSharedStoreCacheSize: 256MB
+  autoMaxProcs:
+    min: 4
+    max: 0
