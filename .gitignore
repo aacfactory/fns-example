@@ -304,6 +304,7 @@ $RECYCLE.BIN/
 
 ### config
 standalone/config/fns-debug.yaml
+standalone/configs/fns-private.yaml
 
 ### TEMP
 graph_sql
