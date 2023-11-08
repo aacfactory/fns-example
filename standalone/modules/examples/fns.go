@@ -3,13 +3,14 @@
 package examples
 
 import (
-	"context"
-	"time"
+	"github.com/aacfactory/fns/commons/bytex"
+	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/runtime"
+	"github.com/aacfactory/fns/services"
+	"github.com/aacfactory/fns/services/validators"
 
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-example/standalone/modules/examples/components"
-	"github.com/aacfactory/fns/service"
-	"github.com/aacfactory/fns/service/documents"
 )
 
 const (
@@ -17,36 +18,17 @@ const (
 	_helloFn = "hello"
 )
 
-func Hello(ctx context.Context, argument HelloArgument) (result HelloArgument, err errors.CodeError) {
-	endpoint, hasEndpoint := service.GetEndpoint(ctx, _name)
-	if !hasEndpoint {
-		err = errors.Warning("examples: endpoint was not found").WithMeta("name", _name)
-		return
-	}
-	fr, requestErr := endpoint.RequestSync(ctx, service.NewRequest(ctx, _name, _helloFn, service.NewArgument(argument)))
-	if requestErr != nil {
-		err = requestErr
-		return
-	}
-	if !fr.Exist() {
-		return
-	}
-	scanErr := fr.Scan(&result)
-	if scanErr != nil {
-		err = errors.Warning("examples: scan future result failed").
-			WithMeta("service", _name).WithMeta("fn", _helloFn).
-			WithCause(scanErr)
-		return
-	}
+func Hello(ctx context.Context, param HelloParam) (result HelloResults, err error) {
+
 	return
 }
 
-func Service() (v service.Service) {
-	v = &_service_{
-		Abstract: service.NewAbstract(
+func Service() (v services.Service) {
+	v = &service{
+		Abstract: services.NewAbstract(
 			_name,
 			false,
-			[]service.Component{
+			[]services.Component{
 				&components.HelloComponent{},
 			}...,
 		),
@@ -54,72 +36,48 @@ func Service() (v service.Service) {
 	return
 }
 
-type _service_ struct {
-	service.Abstract
+type service struct {
+	services.Abstract
 }
 
-func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Argument) (v interface{}, err errors.CodeError) {
-	switch fn {
+func (svc *service) Handle(ctx services.Request) (v interface{}, err error) {
+	_, fn := ctx.Fn()
+	fnName := bytex.ToString(fn)
+	switch fnName {
 	case _helloFn:
-		// param
-		param := HelloArgument{}
-		paramErr := argument.As(&param)
-		if paramErr != nil {
-			err = errors.Warning("examples: decode request argument failed").WithCause(paramErr)
-			break
-		}
-		// make timeout context
-		var cancel context.CancelFunc = nil
-		ctx, cancel = context.WithTimeout(ctx, time.Duration(1000000000))
 		// barrier
-		v, err = svc.Barrier(ctx, _helloFn, argument, func() (v interface{}, err errors.CodeError) {
-			// execute function
+		key := ctx.Hash()
+		if len(ctx.Header().Token()) > 0 {
+			key = append(key, ctx.Header().Token()...)
+		}
+		v, err = runtime.Barrier(ctx, key, func() (v interface{}, err error) {
+			// authorizations
+			// todo
+
+			// permissions
+			// todo
+
+			// param
+			param := HelloParam{}
+			if paramErr := ctx.Argument().As(&param); paramErr != nil {
+				err = errors.BadRequest("invalid body").WithMeta("service", svc.Name()).WithMeta("fn", fnName)
+				return
+			}
+			// validate param
+			if validateErr := validators.Validate(param); validateErr != nil {
+				err = errors.BadRequest("invalid body").WithCause(validateErr).WithMeta("service", svc.Name()).WithMeta("fn", fnName)
+				return
+			}
+			// handle
 			v, err = hello(ctx, param)
+			if err != nil {
+				err = errors.Map(err).WithMeta("service", svc.Name()).WithMeta("fn", fnName)
+				return
+			}
 			return
 		})
-		// cancel timeout context
-		cancel()
-		break
 	default:
-		err = errors.Warning("examples: fn was not found").WithMeta("service", _name).WithMeta("fn", fn)
-		break
+		err = errors.NotFound("fn was not found").WithMeta("service", svc.Name()).WithMeta("fn", fnName)
 	}
 	return
-}
-
-func (svc *_service_) Document() (doc service.Document) {
-	document := documents.NewService(_name, "Example service")
-	// hello
-	document.AddFn(
-		"hello", "Hello", "Hello", false, false,
-		documents.Struct("github.com/aacfactory/fns-example/standalone/modules/examples", "HelloArgument").
-			SetTitle("Hello function argument").
-			SetDescription("Hello function argument").
-			AddProperty(
-				"world",
-				documents.String().
-					SetTitle("Name").
-					SetDescription("Name").
-					AsRequired().
-					SetValidation(documents.NewElementValidation("world_required", "zh", "世界是必须的", "en", "world is required")),
-			),
-		documents.Array(documents.String()).
-			SetPath("github.com/aacfactory/fns-example/standalone/modules/examples").
-			SetName("HelloResults").
-			SetTitle("Hello Results").
-			SetDescription("Hello Results"),
-		[]documents.FnError{
-			{
-				Name_: "examples_hello_failed",
-				Descriptions_: map[string]string{
-					"zh": "错误",
-					"en": "failed",
-				},
-			},
-		},
-	)
-
-	doc = document
-	return
-
 }

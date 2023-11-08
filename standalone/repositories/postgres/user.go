@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"github.com/aacfactory/fns-contrib/databases/sql"
 	"time"
 )
 
@@ -19,8 +18,8 @@ type UserRow struct {
 	Gender   string    `col:"GENDER" json:"GENDER"`
 	Birthday time.Time `col:"BIRTHDAY" json:"BIRTHDAY"`
 	Avatar   *Avatar   `col:"AVATAR,json" json:"AVATAR_ROW" copy:"AVATAR"`
-	BD       sql.Date  `col:"BD" json:"BD"`
-	BT       sql.Time  `col:"BT" json:"BT"`
+	BD       time.Time `col:"BD" json:"BD"`
+	BT       time.Time `col:"BT" json:"BT"`
 }
 
 func (r *UserRow) TableName() (string, string) {

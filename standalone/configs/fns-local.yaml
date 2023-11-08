@@ -2,5 +2,3 @@ log:
   level: debug
   formatter: console
   color: true
-runtime:
-  localSharedStoreCacheSize: 64MB

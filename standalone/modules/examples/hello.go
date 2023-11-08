@@ -1,15 +1,15 @@
 package examples
 
 import (
-	"context"
 	"fmt"
 	"github.com/aacfactory/errors"
+	"github.com/aacfactory/fns/context"
 )
 
-// HelloArgument
+// HelloParam
 // @title Hello function argument
 // @description Hello function argument
-type HelloArgument struct {
+type HelloParam struct {
 	// World
 	// @title Name
 	// @description Name
@@ -32,17 +32,19 @@ type HelloResults []string
 // @title Hello
 // @errors >>>
 // + examples_hello_failed
-// 	- zh: 错误
-//	- en: failed
+//   - zh: 错误
+//   - en: failed
+//
 // <<<
 // @description >>>
 // Hello
 // <<<
-func hello(ctx context.Context, argument HelloArgument) (result HelloResults, err errors.CodeError) {
-	if argument.World == "error" {
+func hello(ctx context.Context, param HelloParam) (result HelloResults, err error) {
+	if param.World == "error" {
 		err = errors.ServiceError("examples_hello_failed")
 		return
 	}
-	result = HelloResults{fmt.Sprintf("hello %s!", argument.World)}
+
+	result = HelloResults{fmt.Sprintf("hello %s!", param.World)}
 	return
 }

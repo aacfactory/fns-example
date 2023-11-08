@@ -3,23 +3,20 @@
 package modules
 
 import (
-	"github.com/aacfactory/fns-contrib/databases/sql"
-	"github.com/aacfactory/fns/service"
-	_ "github.com/lib/pq"
+	"github.com/aacfactory/fns/services"
 )
 
-func Services() (v []service.Service) {
+func Services() (v []services.Service) {
 	v = append(
 		dependencies(),
-		services()...,
+		endpoints()...,
 	)
 	return
 }
 
-func dependencies() (v []service.Service) {
-	v = []service.Service{
+func dependencies() (v []services.Service) {
+	v = []services.Service{
 		// add dependencies here
-		sql.Service(),
 	}
 	return
 }

@@ -1,2 +1,6 @@
-http:
+log:
+  level: warn
+  formatter: console
+  color: true
+transport:
   port: 18080
