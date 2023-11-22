@@ -3,6 +3,7 @@
 package modules
 
 import (
+	"github.com/aacfactory/fns-example/standalone/modules/examples"
 	"github.com/aacfactory/fns/services"
 )
 
@@ -11,6 +12,7 @@ func Services() (v []services.Service) {
 		dependencies(),
 		endpoints()...,
 	)
+	v = append(v, examples.Service())
 	return
 }
 

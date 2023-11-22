@@ -3,13 +3,13 @@
 package modules
 
 import (
-	"github.com/aacfactory/fns-example/standalone/modules/examples"
+	"github.com/aacfactory/fns-example/standalone/modules/users"
 	"github.com/aacfactory/fns/services"
 )
 
 func endpoints() (v []services.Service) {
 	v = []services.Service{
-		examples.Service(),
+		users.Service(),
 	}
 	return
 }

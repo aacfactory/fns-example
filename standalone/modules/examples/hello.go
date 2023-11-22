@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns/context"
+	"sync/atomic"
+	"time"
 )
 
 // HelloParam
@@ -20,10 +22,19 @@ type HelloParam struct {
 	World string `json:"world" validate:"required" validate-message:"world_required"`
 }
 
+func (param *HelloParam) CacheKey(ctx context.Context) (key []byte, err error) {
+
+	return
+}
+
 // HelloResults
 // @title Hello Results
 // @description Hello Results
 type HelloResults []string
+
+var (
+	counter = atomic.Int64{}
+)
 
 // hello
 // @fn hello
@@ -44,7 +55,9 @@ func hello(ctx context.Context, param HelloParam) (result HelloResults, err erro
 		err = errors.ServiceError("examples_hello_failed")
 		return
 	}
-
+	counter.Add(1)
+	time.Sleep(500 * time.Millisecond)
 	result = HelloResults{fmt.Sprintf("hello %s!", param.World)}
+	fmt.Println(counter.Load())
 	return
 }
