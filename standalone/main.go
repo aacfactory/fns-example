@@ -19,7 +19,7 @@ func main() {
 	fns.
 		New(
 			fns.Version(Version),
-			fns.Middleware(cors.CORS()),
+			fns.Middleware(cors.New()),
 		).
 		Deploy(modules.Services()...).
 		Run(context.TODO()).

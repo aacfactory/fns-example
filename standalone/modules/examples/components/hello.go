@@ -6,7 +6,7 @@ import (
 )
 
 // HelloComponent
-// @components
+// @component
 type HelloComponent struct {
 }
 

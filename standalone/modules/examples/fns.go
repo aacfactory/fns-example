@@ -35,8 +35,8 @@ func Hello(ctx context.Context, param HelloParam) (result HelloResults, err erro
 	}
 	if cacheExist {
 		response := services.NewResponse(cached)
-		scanErr := response.Scan(&result)
-		if scanErr == nil {
+		result, err = services.ValueOfResponse[HelloResults](response)
+		if err == nil {
 			return
 		}
 		log := logs.Load(ctx)
@@ -51,18 +51,19 @@ func Hello(ctx context.Context, param HelloParam) (result HelloResults, err erro
 		err = handleErr
 		return
 	}
-	scanErr := response.Scan(&result)
-	if scanErr != nil {
-		err = scanErr
-		return
-	}
+	result, err = services.ValueOfResponse[HelloResults](response)
+	//scanErr := response.Scan(&result)
+	//if scanErr != nil {
+	//	err = scanErr
+	//	return
+	//}
 	return
 }
 
 func _helloFn(ctx services.Request) (v interface{}, err error) {
 	// param
-	param := HelloParam{}
-	if paramErr := ctx.Param().Scan(&param); paramErr != nil {
+	param, paramErr := services.ValueOfParam[HelloParam](ctx.Param())
+	if paramErr != nil {
 		err = errors.BadRequest("scan params failed").WithCause(paramErr)
 		return
 	}
@@ -71,7 +72,7 @@ func _helloFn(ctx services.Request) (v interface{}, err error) {
 		return
 	}
 	// cache
-	cached, cacheExist, cacheGetErr := caches.Get(ctx, &param)
+	cached, cacheExist, cacheGetErr := caches.Get(ctx, param)
 	if cacheGetErr != nil {
 		log := logs.Load(ctx)
 		if log.WarnEnabled() {
@@ -84,7 +85,11 @@ func _helloFn(ctx services.Request) (v interface{}, err error) {
 	}
 	// handle
 	v, err = hello(ctx, param)
+	return
+}
 
+func Component[C services.Component](ctx context.Context, name string) (component C, has bool) {
+	component, has = services.LoadComponent[C](ctx, _endpointName, name)
 	return
 }
 
@@ -107,7 +112,7 @@ func (svc *_service) Construct(options services.Options) (err error) {
 	if err = svc.Abstract.Construct(options); err != nil {
 		return
 	}
-	svc.AddFunction(commons.NewFn(string(_helloFnName), true, false, false, false, false, false, _helloFn))
+	svc.AddFunction(commons.NewFn(string(_helloFnName), true, false, false, false, false, false, _helloFn, &HelloMiddleware{}))
 	return
 }
 

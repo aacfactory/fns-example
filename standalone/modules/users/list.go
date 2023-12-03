@@ -1,27 +1,18 @@
 package users
 
 import (
+	"fmt"
 	"github.com/aacfactory/fns-example/standalone/modules/examples/components"
 	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/services"
+	"github.com/aacfactory/fns/services/commons"
 	"time"
 )
 
-// GetParam
-// @title get param
-// @description get param
-type GetParam struct {
-	// Id
-	// @title id
-	// @description id
-	// @validate-message-i18n >>>
-	// zh: zh_message
-	// en: en_message
-	// <<<
-	Id string `json:"id" validate:"not_blank" validate-message:"invalid_id"`
-}
+type Users []User
 
-// get
-// @fn get
+// list
+// @fn list
 // @readonly
 // @authorization
 // @permission
@@ -30,7 +21,11 @@ type GetParam struct {
 // @cache-control max-age=10 public=true
 // @barrier
 // @metric
-// @title get
+// @middlewares >>>
+// Middle
+// github.com/aacfactory/fns-example/standalone/modules/users/middles.Middle
+// <<<
+// @title list
 // @description >>>
 // dafasdf
 // adsfasfd
@@ -40,14 +35,25 @@ type GetParam struct {
 // zh: zh_message
 // en: en_message
 // <<<
-func get(ctx context.Context, param GetParam) (v User, err error) {
-	v = User{
+func list(ctx context.Context) (v Users, err error) {
+	v = []User{User{
 		Id:       "1",
 		Name:     "1",
 		Age:      "1",
 		Birthday: time.Now(),
-	}
+	}}
 	c, _ := Component[*components.HelloComponent](ctx, "hello")
 	c.Name()
 	return
+}
+
+type Middle struct {
+}
+
+func (m Middle) Handler(next commons.FnHandler) commons.FnHandler {
+	return func(r services.Request) (v interface{}, err error) {
+		fmt.Println("1")
+		v, err = next(r)
+		return
+	}
 }

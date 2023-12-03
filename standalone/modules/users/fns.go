@@ -4,6 +4,7 @@ package users
 
 import (
 	"github.com/aacfactory/errors"
+	"github.com/aacfactory/fns-example/standalone/modules/users/middles"
 	"github.com/aacfactory/fns/context"
 	"github.com/aacfactory/fns/logs"
 	"github.com/aacfactory/fns/runtime"
@@ -18,11 +19,12 @@ import (
 var (
 	_endpointName = []byte("users")
 	_getFnName    = []byte("get")
+	_listFnName   = []byte("list")
 )
 
 // +-------------------------------------------------------------------------------------------------------------------+
 
-func Get(ctx context.Context, param GetParam) (result GetParam, err error) {
+func Get(ctx context.Context, param GetParam) (result User, err error) {
 	// validate param
 	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
 		return
@@ -37,13 +39,13 @@ func Get(ctx context.Context, param GetParam) (result GetParam, err error) {
 	}
 	if cacheExist {
 		response := services.NewResponse(cached)
-		scanErr := response.Scan(&result)
-		if scanErr == nil {
+		result, err = services.ValueOfResponse[User](response)
+		if err == nil {
 			return
 		}
 		log := logs.Load(ctx)
 		if log.WarnEnabled() {
-			log.Warn().Cause(scanErr).With("fns", "caches").Message("fns: scan cached value failed")
+			log.Warn().Cause(err).With("fns", "caches").Message("fns: scan cached value failed")
 		}
 	}
 	// handle
@@ -53,19 +55,15 @@ func Get(ctx context.Context, param GetParam) (result GetParam, err error) {
 		err = handleErr
 		return
 	}
-	scanErr := response.Scan(&result)
-	if scanErr != nil {
-		err = scanErr
-		return
-	}
+	result, err = services.ValueOfResponse[User](response)
 	return
 
 }
 
 func _get(ctx services.Request) (v any, err error) {
 	// param
-	param := GetParam{}
-	if paramErr := ctx.Param().Scan(&param); paramErr != nil {
+	param, paramErr := services.ValueOfParam[GetParam](ctx.Param())
+	if paramErr != nil {
 		err = errors.BadRequest("scan params failed").WithCause(paramErr)
 		return
 	}
@@ -74,7 +72,7 @@ func _get(ctx services.Request) (v any, err error) {
 		return
 	}
 	// cache get
-	cached, cacheExist, cacheGetErr := caches.Get(ctx, &param)
+	cached, cacheExist, cacheGetErr := caches.Get(ctx, param)
 	if cacheGetErr != nil {
 		log := logs.Load(ctx)
 		if log.WarnEnabled() {
@@ -102,6 +100,37 @@ func _get(ctx services.Request) (v any, err error) {
 
 // +-------------------------------------------------------------------------------------------------------------------+
 
+func List(ctx context.Context) (result Users, err error) {
+	// handle
+	eps := runtime.Endpoints(ctx)
+	response, handleErr := eps.Request(ctx, _endpointName, _listFnName, nil)
+	if handleErr != nil {
+		err = handleErr
+		return
+	}
+	result, err = services.ValueOfResponse[Users](response)
+	return
+
+}
+
+func _list(ctx services.Request) (v any, err error) {
+	// handle
+	v, err = list(ctx)
+	// cache control
+	cachecontrol.Make(ctx, cachecontrol.MaxAge(10), cachecontrol.Public())
+	return
+
+}
+
+// +-------------------------------------------------------------------------------------------------------------------+
+
+func Component[C services.Component](ctx context.Context, name string) (component C, has bool) {
+	component, has = services.LoadComponent[C](ctx, _endpointName, name)
+	return
+}
+
+// +-------------------------------------------------------------------------------------------------------------------+
+
 func Service() (v services.Service) {
 	v = &_service{
 		Abstract: services.NewAbstract(
@@ -123,6 +152,7 @@ func (svc *_service) Construct(options services.Options) (err error) {
 		return
 	}
 	svc.AddFunction(commons.NewFn(string(_getFnName), true, false, true, true, true, true, _get))
+	svc.AddFunction(commons.NewFn(string(_listFnName), true, false, true, true, true, true, _list, &Middle{}, &middles.Middle{}))
 	return
 }
 
@@ -161,6 +191,35 @@ func (svc *_service) Document() (document documents.Endpoint) {
 					"birthday",
 					documents.DateTime(),
 				)).
+			SetErrors("user_not_found\nzh: zh_message\nen: en_message"),
+	)
+
+	// list
+	document.AddFn(
+		documents.NewFn("list").
+			SetInfo("list", "dafasdf\nadsfasfd").
+			SetReadonly(true).SetDeprecated(false).
+			SetAuthorization(true).SetPermission(true).
+			SetParam(documents.Nil()).
+			SetResult(documents.Array(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").
+				AddProperty(
+					"id",
+					documents.String(),
+				).
+				AddProperty(
+					"name",
+					documents.String(),
+				).
+				AddProperty(
+					"age",
+					documents.String(),
+				).
+				AddProperty(
+					"birthday",
+					documents.DateTime(),
+				)).
+				SetPath("github.com/aacfactory/fns-example/standalone/modules/users").
+				SetName("Users")).
 			SetErrors("user_not_found\nzh: zh_message\nen: en_message"),
 	)
 	return

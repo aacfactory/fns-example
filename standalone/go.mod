@@ -2,19 +2,24 @@ module github.com/aacfactory/fns-example/standalone
 
 go 1.21
 
-replace github.com/aacfactory/fns v1.1.1 => ../../fns
+replace (
+	github.com/aacfactory/fns v1.1.3 => ../../fns
+	github.com/aacfactory/fns-contrib/databases/sql v1.0.30 => ../../fns-contrib/databases/sql
+)
 
 require (
 	github.com/aacfactory/errors v1.13.5
-	github.com/aacfactory/fns v1.1.1
+	github.com/aacfactory/fns v1.1.3
+	github.com/aacfactory/fns-contrib/databases/sql v1.0.30
 	github.com/aacfactory/gcg v1.0.5
+	github.com/lib/pq v1.10.9
 )
 
 require (
 	github.com/aacfactory/afssl v1.10.0 // indirect
 	github.com/aacfactory/cases v1.1.0 // indirect
 	github.com/aacfactory/configures v1.12.1 // indirect
-	github.com/aacfactory/json v1.16.0 // indirect
+	github.com/aacfactory/json v1.16.5 // indirect
 	github.com/aacfactory/logs v1.13.0 // indirect
 	github.com/aacfactory/workers v1.8.4 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
@@ -27,6 +32,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.16.0 // indirect
 	github.com/goccy/go-yaml v1.11.2 // indirect
+	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.3 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
@@ -48,12 +54,12 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/automaxprocs v1.5.3 // indirect
-	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.15.0 // indirect
+	golang.org/x/tools v0.16.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 )
