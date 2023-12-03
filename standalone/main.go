@@ -5,6 +5,7 @@ import (
 	"github.com/aacfactory/fns-example/standalone/modules"
 	"github.com/aacfactory/fns/context"
 	"github.com/aacfactory/fns/transports/middlewares/cors"
+	_ "github.com/lib/pq"
 )
 
 var (
