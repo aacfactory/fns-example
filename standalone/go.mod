@@ -1,10 +1,11 @@
 module github.com/aacfactory/fns-example/standalone
 
-go 1.21
+go 1.21.0
 
 replace (
 	github.com/aacfactory/fns v1.1.3 => ../../fns
 	github.com/aacfactory/fns-contrib/databases/sql v1.0.30 => ../../fns-contrib/databases/sql
+	github.com/aacfactory/fns-contrib/databases/postgres v1.0.0 => ../../fns-contrib/databases/postgres
 )
 
 require (
@@ -19,6 +20,7 @@ require (
 	github.com/aacfactory/afssl v1.10.0 // indirect
 	github.com/aacfactory/cases v1.1.0 // indirect
 	github.com/aacfactory/configures v1.12.1 // indirect
+	github.com/aacfactory/fns-contrib/databases/postgres v1.0.0 // indirect
 	github.com/aacfactory/json v1.16.5 // indirect
 	github.com/aacfactory/logs v1.13.0 // indirect
 	github.com/aacfactory/workers v1.8.4 // indirect

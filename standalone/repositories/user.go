@@ -1,19 +1,21 @@
 package repositories
 
 import (
+	"github.com/aacfactory/fns-contrib/databases/sql"
 	"github.com/aacfactory/fns-contrib/databases/sql/dac"
+	"github.com/aacfactory/fns/commons/times"
 	"time"
 )
 
 type UserRow struct {
 	dac.Audit
-	Nickname string    `column:"NICKNAME" json:"NICKNAME"`
-	Mobile   string    `column:"MOBILE" json:"MOBILE"`
-	Gender   string    `column:"GENDER" json:"GENDER"`
-	Birthday time.Time `column:"BIRTHDAY" json:"BIRTHDAY"`
-	Avatar   *Avatar   `column:"AVATAR,json" json:"AVATAR_ROW" copy:"AVATAR"`
-	BD       time.Time `column:"BD" json:"BD"`
-	BT       time.Time `column:"BT" json:"BT"`
+	Nickname string               `column:"NICKNAME" json:"NICKNAME"`
+	Mobile   string               `column:"MOBILE" json:"MOBILE"`
+	Gender   string               `column:"GENDER" json:"GENDER"`
+	Birthday time.Time            `column:"BIRTHDAY" json:"BIRTHDAY"`
+	Avatar   sql.NullJson[Avatar] `column:"AVATAR,json" json:"AVATAR_ROW" copy:"AVATAR"`
+	BD       times.Date           `column:"BD" json:"BD"`
+	BT       times.Time           `column:"BT" json:"BT"`
 }
 
 func (row UserRow) TableInfo() dac.TableInfo {
