@@ -77,16 +77,20 @@ func TestPostLikeRow_Insert(t *testing.T) {
 	setupPostgres(t)
 	defer tests.Teardown()
 	beg := time.Now()
-	rows, queryErr := postgres.ALL[repositories.PostLikeRow](
+	row, ok, execErr := postgres.Insert[repositories.PostLikeRow](
 		tests.TODO(),
-		postgres.Conditions(postgres.Eq("PostId", "1")),
+		repositories.PostLikeRow{
+			Id:     0,
+			PostId: "x",
+			UserId: "x",
+		},
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())
-	if queryErr != nil {
-		t.Errorf("%+v", queryErr)
+	if execErr != nil {
+		t.Errorf("%+v", execErr)
 		return
 	}
-	for _, row := range rows {
+	if ok {
 		fmt.Println(fmt.Sprintf("%+v", row))
 	}
 }
