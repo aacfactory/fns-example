@@ -61,6 +61,37 @@ func TestPost_Insert(t *testing.T) {
 
 }
 
+func TestPost_InsertWhenNotExist(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	row, ok, insertErr := postgres.InsertWhenExist[repositories.PostRow](
+		ctx,
+		repositories.PostRow{
+			CreateAT: time.Time{},
+			Version:  0,
+			Title:    "test",
+			Content:  "test",
+		},
+		postgres.SubQuery(repositories.UserRow{}, "Id", postgres.Eq("Id", "cb1nn3de2f64qo1sfu3g")),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if insertErr != nil {
+		t.Errorf("%+v", insertErr)
+		return
+	}
+	if ok {
+		fmt.Println(fmt.Sprintf("%+v", row))
+	}
+
+}
+
 func TestPost_Update(t *testing.T) {
 	setupPostgres(t)
 	defer tests.Teardown()
@@ -166,4 +197,25 @@ func TestPost_DeleteCond(t *testing.T) {
 		return
 	}
 	fmt.Println(affected)
+}
+
+func TestPost_QueryIn(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	ctx := tests.TODO()
+	beg := time.Now()
+	rows, queryErr := postgres.Query[repositories.PostRow](
+		ctx,
+		0, 10,
+		postgres.Conditions(postgres.In("User",
+			postgres.SubQuery(repositories.UserRow{}, "Id", postgres.Eq("Id", "cb1nn3de2f64qo1sfu3g")))),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if queryErr != nil {
+		t.Errorf("%+v", queryErr)
+		return
+	}
+	for _, row := range rows {
+		fmt.Println(fmt.Sprintf("%+v", row))
+	}
 }

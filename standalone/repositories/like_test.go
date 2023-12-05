@@ -1,7 +1,6 @@
 package repositories_test
 
 import (
-	stdsql "database/sql"
 	"fmt"
 	"github.com/aacfactory/fns-contrib/databases/postgres"
 	_ "github.com/aacfactory/fns-contrib/databases/postgres/dialect"
@@ -83,10 +82,7 @@ func TestPostLikeRow_Insert(t *testing.T) {
 		repositories.PostLikeRow{
 			Id:     0,
 			PostId: "x",
-			UserId: stdsql.NullString{
-				String: "x",
-				Valid:  true,
-			},
+			UserId: "x",
 		},
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())
@@ -95,6 +91,30 @@ func TestPostLikeRow_Insert(t *testing.T) {
 		return
 	}
 	if ok {
+		fmt.Println(fmt.Sprintf("%+v", row))
+	}
+}
+
+func TestPostLikeRow_InsertMulti(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	rows := []repositories.PostLikeRow{
+		{0, "p1", "u1"},
+		{0, "p2", "u2"},
+		{0, "p3", "u3"},
+	}
+	affected, execErr := postgres.InsertMulti[repositories.PostLikeRow](
+		tests.TODO(),
+		rows,
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if execErr != nil {
+		t.Errorf("%+v", execErr)
+		return
+	}
+	fmt.Println(affected, affected == int64(len(rows)))
+	for _, row := range rows {
 		fmt.Println(fmt.Sprintf("%+v", row))
 	}
 }
@@ -108,10 +128,7 @@ func TestPostLikeRow_Update(t *testing.T) {
 		repositories.PostLikeRow{
 			Id:     1,
 			PostId: "x",
-			UserId: stdsql.NullString{
-				String: "x",
-				Valid:  true,
-			},
+			UserId: "x",
 		},
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())
@@ -133,10 +150,7 @@ func TestPostLikeRow_Delete(t *testing.T) {
 		repositories.PostLikeRow{
 			Id:     21,
 			PostId: "x",
-			UserId: stdsql.NullString{
-				String: "x",
-				Valid:  true,
-			},
+			UserId: "x",
 		},
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())

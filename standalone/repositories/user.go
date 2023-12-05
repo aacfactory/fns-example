@@ -19,7 +19,7 @@ type UserRow struct {
 }
 
 func (row UserRow) TableInfo() dac.TableInfo {
-	return dac.Info("USER", dac.Schema("FNS"))
+	return dac.Info("USER", dac.Schema("FNS"), dac.Conflicts("Id"))
 }
 
 // Avatar

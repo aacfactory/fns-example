@@ -62,3 +62,37 @@ func TestUser_Insert(t *testing.T) {
 		fmt.Println(fmt.Sprintf("%+v", row))
 	}
 }
+
+func TestUser_InsertOrUpdate(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	user := repositories.UserRow{
+		Nickname: "u1",
+		Mobile:   "14400000001",
+		Gender:   "F",
+		Birthday: time.Now(),
+		Avatar:   sql.NullJson[repositories.Avatar]{},
+		BD:       times.DateNow(),
+		BT:       times.TimeNow(),
+	}
+	user.Id = "1"
+	row, ok, insertErr := postgres.InsertOrUpdate[repositories.UserRow](
+		ctx,
+		user,
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if insertErr != nil {
+		t.Errorf("%+v", insertErr)
+		return
+	}
+	if ok {
+		fmt.Println(fmt.Sprintf("%+v", row))
+	}
+}

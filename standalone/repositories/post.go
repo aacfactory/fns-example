@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"database/sql"
 	"github.com/aacfactory/fns-contrib/databases/sql/dac"
 	"time"
 )
@@ -36,9 +35,9 @@ func (row PostCommentRow) TableInfo() dac.TableInfo {
 }
 
 type PostLikeRow struct {
-	Id     int64          `column:"ID,pk,incr" json:"ID"`
-	PostId string         `column:"POST_ID" json:"POST_ID"`
-	UserId sql.NullString `column:"USER_ID" json:"USER_ID"`
+	Id     int64  `column:"ID,pk,incr" json:"ID"`
+	PostId string `column:"POST_ID" json:"POST_ID"`
+	UserId string `column:"USER_ID" json:"USER_ID"`
 }
 
 func (row PostLikeRow) TableInfo() dac.TableInfo {
