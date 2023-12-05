@@ -5,27 +5,21 @@ import (
 	"github.com/aacfactory/fns-contrib/databases/postgres"
 	_ "github.com/aacfactory/fns-contrib/databases/postgres/dialect"
 	"github.com/aacfactory/fns-example/standalone/repositories"
+	"github.com/aacfactory/fns/services/authorizations"
 	"github.com/aacfactory/fns/tests"
 	_ "github.com/lib/pq"
 	"testing"
 	"time"
 )
 
-func setupPostgres(t *testing.T) {
-	err := tests.Setup(postgres.New(), tests.WithConfigActive("private"))
-	if err != nil {
-		t.Fatalf("%+v", err)
-	}
-}
-
-func TestPostLikeRow_Query(t *testing.T) {
+func TestPost_Query(t *testing.T) {
 	setupPostgres(t)
 	defer tests.Teardown()
 	beg := time.Now()
-	rows, queryErr := postgres.Query[repositories.PostLikeRow](
+	rows, queryErr := postgres.Query[repositories.PostRow](
 		tests.TODO(),
 		0, 10,
-		postgres.Conditions(postgres.Eq("PostId", "1")),
+		postgres.Conditions(postgres.Eq("Version", 1)),
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())
 	if queryErr != nil {
@@ -37,60 +31,139 @@ func TestPostLikeRow_Query(t *testing.T) {
 	}
 }
 
-func TestPostLikeRow_One(t *testing.T) {
+func TestPost_Insert(t *testing.T) {
 	setupPostgres(t)
 	defer tests.Teardown()
 	beg := time.Now()
-	row, has, queryErr := postgres.One[repositories.PostLikeRow](
-		tests.TODO(),
-		postgres.Conditions(postgres.Eq("PostId", "1")),
-	)
-	fmt.Println("latency", time.Now().Sub(beg).String())
-	if queryErr != nil {
-		t.Errorf("%+v", queryErr)
-		return
-	}
-	if has {
-		fmt.Println(fmt.Sprintf("%+v", row))
-	}
-}
-
-func TestPostLikeRow_All(t *testing.T) {
-	setupPostgres(t)
-	defer tests.Teardown()
-	beg := time.Now()
-	rows, queryErr := postgres.ALL[repositories.PostLikeRow](
-		tests.TODO(),
-		postgres.Conditions(postgres.Eq("PostId", "1")),
-	)
-	fmt.Println("latency", time.Now().Sub(beg).String())
-	if queryErr != nil {
-		t.Errorf("%+v", queryErr)
-		return
-	}
-	for _, row := range rows {
-		fmt.Println(fmt.Sprintf("%+v", row))
-	}
-}
-
-func TestPostLikeRow_Insert(t *testing.T) {
-	setupPostgres(t)
-	defer tests.Teardown()
-	beg := time.Now()
-	row, ok, execErr := postgres.Insert[repositories.PostLikeRow](
-		tests.TODO(),
-		repositories.PostLikeRow{
-			Id:     0,
-			PostId: "x",
-			UserId: "x",
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	row, ok, insertErr := postgres.Insert[repositories.PostRow](
+		ctx,
+		repositories.PostRow{
+			CreateAT: time.Time{},
+			Version:  0,
+			Title:    "test",
+			Content:  "test",
 		},
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())
-	if execErr != nil {
-		t.Errorf("%+v", execErr)
+	if insertErr != nil {
+		t.Errorf("%+v", insertErr)
 		return
 	}
 	if ok {
 		fmt.Println(fmt.Sprintf("%+v", row))
 	}
+
+}
+
+func TestPost_Update(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	user := repositories.UserRow{}
+	user.Id = "1"
+	row, ok, updateErr := postgres.Update[repositories.PostRow](
+		ctx,
+		repositories.PostRow{
+			Id:       "1",
+			User:     user,
+			CreateAT: time.Time{},
+			Version:  1,
+			Title:    "test",
+			Content:  "test1",
+			Comments: nil,
+			Likes:    0,
+		},
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if updateErr != nil {
+		t.Errorf("%+v", updateErr)
+		return
+	}
+	if ok {
+		fmt.Println(fmt.Sprintf("%+v", row))
+	}
+}
+
+func TestPost_UpdateFields(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	user := repositories.UserRow{}
+	user.Id = "3"
+	affected, updateErr := postgres.UpdateFields[repositories.PostRow](
+		ctx,
+		postgres.Field("User", user),
+		postgres.Eq("Id", "1"),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if updateErr != nil {
+		t.Errorf("%+v", updateErr)
+		return
+	}
+	fmt.Println(affected)
+}
+
+func TestPost_Delete(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	row, ok, deleteErr := postgres.Delete[repositories.PostRow](
+		ctx,
+		repositories.PostRow{
+			Id:      "clnhn2qsvgs2te7gu5tg",
+			Version: 1,
+		},
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if deleteErr != nil {
+		t.Errorf("%+v", deleteErr)
+		return
+	}
+	fmt.Println(ok, row)
+}
+
+func TestPost_DeleteCond(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	ctx := authorizations.With(tests.TODO(), authorizations.Authorization{
+		Id:         authorizations.StringId([]byte("abc")),
+		Account:    nil,
+		Attributes: nil,
+		ExpireAT:   time.Now().AddDate(1, 1, 1),
+	})
+	affected, deleteErr := postgres.DeleteByCondition[repositories.PostRow](
+		ctx,
+		postgres.Like("Title", "post"),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if deleteErr != nil {
+		t.Errorf("%+v", deleteErr)
+		return
+	}
+	fmt.Println(affected)
 }
