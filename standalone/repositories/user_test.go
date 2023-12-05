@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns-contrib/databases/sql"
+	"github.com/aacfactory/fns-contrib/databases/sql/dac/groups"
 	"github.com/aacfactory/fns-example/standalone/repositories"
 	"github.com/aacfactory/fns/commons/times"
 	"github.com/aacfactory/fns/services/authorizations"
@@ -95,4 +96,56 @@ func TestUser_InsertOrUpdate(t *testing.T) {
 	if ok {
 		fmt.Println(fmt.Sprintf("%+v", row))
 	}
+}
+
+func TestUserGenderCount_Query(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	rows, queryErr := postgres.Views[repositories.UserGenderCount](
+		tests.TODO(),
+		0, 10,
+		postgres.GroupBy(groups.Group("Gender")),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if queryErr != nil {
+		t.Errorf("%+v", queryErr)
+		return
+	}
+	for _, row := range rows {
+		fmt.Println(fmt.Sprintf("%+v", row))
+	}
+
+}
+
+func TestUserRow_Count(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	count, countErr := postgres.Count[repositories.UserRow](
+		tests.TODO(),
+		postgres.Eq("Version", 1),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if countErr != nil {
+		t.Errorf("%+v", countErr)
+		return
+	}
+	fmt.Println(count)
+}
+
+func TestUserRow_Exist(t *testing.T) {
+	setupPostgres(t)
+	defer tests.Teardown()
+	beg := time.Now()
+	exist, existErr := postgres.Exist[repositories.UserRow](
+		tests.TODO(),
+		postgres.Eq("Version", 1),
+	)
+	fmt.Println("latency", time.Now().Sub(beg).String())
+	if existErr != nil {
+		t.Errorf("%+v", existErr)
+		return
+	}
+	fmt.Println(exist)
 }

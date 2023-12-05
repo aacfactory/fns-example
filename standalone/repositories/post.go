@@ -7,7 +7,7 @@ import (
 
 type PostRow struct {
 	Id       string          `column:"ID,pk" json:"ID"`
-	User     UserRow         `column:"USER_ID,ref,User+Id" json:"USER"`
+	User     UserRow         `column:"USER_ID,ref,Id" json:"USER"`
 	CreateAT time.Time       `column:"CREATE_AT,act" json:"CREATE_AT"`
 	Version  int64           `column:"VERSION,aol" json:"VERSION"`
 	Title    string          `column:"TITLE" json:"TITLE"`
@@ -25,7 +25,7 @@ type PostCommentRows []PostCommentRow
 type PostCommentRow struct {
 	Id       int64     `column:"ID,pk,incr" json:"ID"`
 	PostId   string    `column:"POST_ID" json:"POST_ID"`
-	User     UserRow   `column:"USER_ID,ref,User+Id" json:"USER"`
+	User     UserRow   `column:"USER_ID,ref,Id" json:"USER"`
 	CreateAT time.Time `column:"CREATE_AT,act" json:"CREATE_AT"`
 	Content  string    `column:"CONTENT" json:"CONTENT"`
 }

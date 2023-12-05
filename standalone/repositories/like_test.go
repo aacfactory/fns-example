@@ -3,7 +3,7 @@ package repositories_test
 import (
 	"fmt"
 	"github.com/aacfactory/fns-contrib/databases/postgres"
-	_ "github.com/aacfactory/fns-contrib/databases/postgres/dialect"
+
 	"github.com/aacfactory/fns-example/standalone/repositories"
 	"github.com/aacfactory/fns/tests"
 	_ "github.com/lib/pq"

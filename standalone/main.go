@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/aacfactory/fns"
+	_ "github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns-example/standalone/modules"
 	"github.com/aacfactory/fns/context"
 	"github.com/aacfactory/fns/transports/middlewares/cors"
