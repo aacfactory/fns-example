@@ -2,11 +2,14 @@ package repositories_test
 
 import (
 	"fmt"
+	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns-example/standalone/repositories"
 	"github.com/aacfactory/fns/services/authorizations"
 	"github.com/aacfactory/fns/tests"
 	_ "github.com/lib/pq"
+	"reflect"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -27,6 +30,63 @@ func TestPost_Query(t *testing.T) {
 	}
 	for _, row := range rows {
 		fmt.Println(fmt.Sprintf("%+v", row))
+	}
+}
+
+func BenchmarkPost_List(b *testing.B) {
+	err := tests.Setup(postgres.New(), tests.WithConfigActive("private"))
+	if err != nil {
+		b.Fatalf("%+v", err)
+	}
+	b.ResetTimer()
+	b.ReportAllocs()
+	defer tests.Teardown()
+	n := atomic.Int64{}
+	errs := errors.MakeErrors()
+	for i := 0; i < b.N; i++ {
+		_, err = postgres.Query[repositories.PostRow](
+			tests.TODO(),
+			0, 10,
+			postgres.Conditions(postgres.Eq("Version", 1)),
+		)
+		if err != nil {
+			n.Add(1)
+			errs.Append(err)
+		}
+	}
+	if n.Load() > 0 {
+		b.Logf("errors: %v\n", n.Load())
+		fmt.Println(fmt.Sprintf("%+v\n", errs.Error()))
+	}
+}
+
+// go test -bench='Post_Query$' -run none -benchmem -cpuprofile cpu.out -memprofile mem.out -blockprofile .\block.out
+func BenchmarkPost_Query(b *testing.B) {
+	err := tests.Setup(postgres.New(), tests.WithConfigActive("private"))
+	if err != nil {
+		b.Fatalf("%+v", err)
+	}
+	b.ResetTimer()
+	b.ReportAllocs()
+	defer tests.Teardown()
+	n := atomic.Int64{}
+	errs := errors.MakeErrors()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, err = postgres.Query[repositories.PostRow](
+				tests.TODO(),
+				0, 10,
+				postgres.Conditions(postgres.Eq("Version", 1)),
+			)
+			if err != nil {
+				n.Add(1)
+				errs.Append(err)
+			}
+		}
+	})
+	if n.Load() > 0 {
+		b.Logf("errors: %v\n", n.Load())
+		fmt.Println(fmt.Sprintf("%+v\n", errs.Error()))
 	}
 }
 
@@ -217,4 +277,17 @@ func TestPost_QueryIn(t *testing.T) {
 	for _, row := range rows {
 		fmt.Println(fmt.Sprintf("%+v", row))
 	}
+}
+
+func TestSll(t *testing.T) {
+	ss := []string{"1", "2", "3"}
+	vv := any(ss)
+	v, ok := vv.([]any)
+	fmt.Println(v, ok)
+}
+
+func TestBR(t *testing.T) {
+	b := byte('1')
+	rt := reflect.TypeOf(b)
+	fmt.Println(rt.Kind())
 }

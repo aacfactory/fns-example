@@ -18,9 +18,46 @@ import (
 
 var (
 	_endpointName = []byte("users")
+	_addFnName    = []byte("add")
 	_getFnName    = []byte("get")
 	_listFnName   = []byte("list")
 )
+
+// +-------------------------------------------------------------------------------------------------------------------+
+
+func Add(ctx context.Context, param AddParam) (result User, err error) {
+	// validate param
+	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
+		return
+	}
+	// handle
+	eps := runtime.Endpoints(ctx)
+	response, handleErr := eps.Request(ctx, _endpointName, _addFnName, param)
+	if handleErr != nil {
+		err = handleErr
+		return
+	}
+	result, err = services.ValueOfResponse[User](response)
+	return
+
+}
+
+func _add(ctx services.Request) (v any, err error) {
+	// param
+	param, paramErr := services.ValueOfParam[AddParam](ctx.Param())
+	if paramErr != nil {
+		err = errors.BadRequest("scan params failed").WithCause(paramErr)
+		return
+	}
+	// validate param
+	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
+		return
+	}
+	// handle
+	v, err = add(ctx, param)
+	return
+
+}
 
 // +-------------------------------------------------------------------------------------------------------------------+
 
@@ -151,6 +188,7 @@ func (svc *_service) Construct(options services.Options) (err error) {
 	if err = svc.Abstract.Construct(options); err != nil {
 		return
 	}
+	svc.AddFunction(commons.NewFn(string(_addFnName), false, false, true, false, false, false, _add))
 	svc.AddFunction(commons.NewFn(string(_getFnName), true, false, true, true, true, true, _get))
 	svc.AddFunction(commons.NewFn(string(_listFnName), true, false, true, true, true, true, _list, &Middle{}, &middles.Middle{}))
 	return
@@ -158,15 +196,72 @@ func (svc *_service) Construct(options services.Options) (err error) {
 
 func (svc *_service) Document() (document documents.Endpoint) {
 	document = documents.New(svc.Name(), "Users", "Users")
+	// add
+	document.AddFn(
+		documents.NewFn("add").
+			SetInfo("add", "add user").
+			SetReadonly(false).SetInternal(false).SetDeprecated(false).
+			SetAuthorization(true).SetPermission(false).
+			SetParam(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "AddParam").
+				SetTitle("add param").
+				SetDescription("add user param").
+				AddProperty(
+					"id",
+					documents.String().
+						SetTitle("user id").
+						SetDescription("user id").
+						AsRequired().
+						SetValidation(documents.NewValidation("")),
+				).
+				AddProperty(
+					"name",
+					documents.String().
+						SetTitle("name").
+						SetDescription("name").
+						AsRequired().
+						SetValidation(documents.NewValidation("")),
+				).
+				AddProperty(
+					"age",
+					documents.Int64().
+						SetTitle("age").
+						SetDescription("age"),
+				).
+				AddProperty(
+					"birthday",
+					documents.Time().
+						SetTitle("birthday").
+						SetDescription("birthday"),
+				)).
+			SetResult(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").
+				AddProperty(
+					"id",
+					documents.String(),
+				).
+				AddProperty(
+					"name",
+					documents.String(),
+				).
+				AddProperty(
+					"age",
+					documents.String(),
+				).
+				AddProperty(
+					"birthday",
+					documents.DateTime(),
+				)).
+			SetErrors("user_not_found\nzh: zh_message\nen: en_message"),
+	)
+
 	// get
 	document.AddFn(
 		documents.NewFn("get").
 			SetInfo("get", "dafasdf\nadsfasfd").
-			SetReadonly(true).SetDeprecated(false).
+			SetReadonly(true).SetInternal(false).SetDeprecated(false).
 			SetAuthorization(true).SetPermission(true).
 			SetParam(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "GetParam").
-				SetTitle("get").
-				SetDescription("get").
+				SetTitle("get param").
+				SetDescription("get param").
 				AddProperty(
 					"id",
 					documents.String().
@@ -198,7 +293,7 @@ func (svc *_service) Document() (document documents.Endpoint) {
 	document.AddFn(
 		documents.NewFn("list").
 			SetInfo("list", "dafasdf\nadsfasfd").
-			SetReadonly(true).SetDeprecated(false).
+			SetReadonly(true).SetInternal(false).SetDeprecated(false).
 			SetAuthorization(true).SetPermission(true).
 			SetParam(documents.Nil()).
 			SetResult(documents.Array(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").

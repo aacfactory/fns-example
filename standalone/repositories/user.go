@@ -16,6 +16,7 @@ type UserRow struct {
 	Avatar   sql.NullJson[Avatar] `column:"AVATAR,json"`
 	BD       times.Date           `column:"BD"`
 	BT       times.Time           `column:"BT"`
+	Comment  PostLikeRow          `column:"Comment,link,Id+UserId"`
 }
 
 func (row UserRow) TableInfo() dac.TableInfo {
