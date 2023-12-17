@@ -1,0 +1,24 @@
+log:
+  level: debug
+  formatter: console
+  color: true
+cluster:
+  name: "redis"
+  option:
+    initAddress:
+      - "127.0.0.1:16379"
+services:
+  sql:
+    kind: "standalone"
+    isolation: 2
+    transactionMaxAge: 10
+    debugLog: true
+    options:
+      driver: "postgres"
+      dsn: "postgres://aacfactory:Freedom1581$@106.14.203.132:15432/aacfactory?sslmode=disable"
+      maxIdles: 0
+      maxOpens: 0
+      statements:
+        enable: true
+        cacheSize: 256
+        evictTimeoutSeconds: 10
