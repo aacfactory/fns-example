@@ -2,23 +2,14 @@ module github.com/aacfactory/fns-example/standalone
 
 go 1.21.0
 
-replace (
-	github.com/aacfactory/fns v1.1.3 => ../../fns
-	github.com/aacfactory/fns-contrib/databases/postgres v1.0.0 => ../../fns-contrib/databases/postgres
-	github.com/aacfactory/fns-contrib/databases/sql v1.0.30 => ../../fns-contrib/databases/sql
-	github.com/aacfactory/fns-contrib/transports/handlers/documents v0.0.0-20231215144253-10f035057dcc => ../../fns-contrib/transports/handlers/documents
-	github.com/aacfactory/fns-contrib/transports/handlers/pprof v0.0.0-20231215183902-cf1c13fbb23c => ../../fns-contrib/transports/handlers/pprof
-	github.com/aacfactory/fns-contrib/transports/handlers/websockets v0.0.0-20231215183902-cf1c13fbb23c => ../../fns-contrib/transports/handlers/websockets
-)
-
 require (
 	github.com/aacfactory/errors v1.13.11
-	github.com/aacfactory/fns v1.1.3
-	github.com/aacfactory/fns-contrib/databases/postgres v1.0.0
-	github.com/aacfactory/fns-contrib/databases/sql v1.0.30
-	github.com/aacfactory/fns-contrib/transports/handlers/documents v0.0.0-20231215144253-10f035057dcc
-	github.com/aacfactory/fns-contrib/transports/handlers/pprof v0.0.0-20231215183902-cf1c13fbb23c
-	github.com/aacfactory/fns-contrib/transports/handlers/websockets v0.0.0-20231215183902-cf1c13fbb23c
+	github.com/aacfactory/fns v1.2.1
+	github.com/aacfactory/fns-contrib/databases/postgres v1.2.1
+	github.com/aacfactory/fns-contrib/databases/sql v1.2.1
+	github.com/aacfactory/fns-contrib/transports/handlers/documents v1.2.1
+	github.com/aacfactory/fns-contrib/transports/handlers/pprof v1.2.1
+	github.com/aacfactory/fns-contrib/transports/handlers/websockets v1.2.1
 	github.com/aacfactory/gcg v1.0.5
 	github.com/lib/pq v1.10.9
 )
@@ -67,7 +58,7 @@ require (
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
+	golang.org/x/tools v0.16.1 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )

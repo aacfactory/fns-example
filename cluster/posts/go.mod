@@ -2,20 +2,13 @@ module github.com/aacfactory/fns-example/cluster/posts
 
 go 1.21.0
 
-replace (
-	github.com/aacfactory/fns v1.1.3 => ../../../fns
-	github.com/aacfactory/fns-contrib/databases/postgres v1.0.0 => ../../../fns-contrib/databases/postgres
-	github.com/aacfactory/fns-contrib/databases/redis v1.0.30 => ../../../fns-contrib/databases/redis
-	github.com/aacfactory/fns-contrib/databases/sql v1.0.30 => ../../../fns-contrib/databases/sql
-)
-
 require (
 	github.com/aacfactory/copier v1.2.1
 	github.com/aacfactory/errors v1.13.11
-	github.com/aacfactory/fns v1.1.3
-	github.com/aacfactory/fns-contrib/databases/postgres v1.0.0
-	github.com/aacfactory/fns-contrib/databases/redis v1.0.30
-	github.com/aacfactory/fns-contrib/databases/sql v1.0.30
+	github.com/aacfactory/fns v1.2.1
+	github.com/aacfactory/fns-contrib/databases/postgres v1.2.1
+	github.com/aacfactory/fns-contrib/databases/redis v1.2.2
+	github.com/aacfactory/fns-contrib/databases/sql v1.2.1
 	github.com/lib/pq v1.10.9
 )
 
@@ -46,7 +39,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
-	github.com/redis/rueidis v1.0.23 // indirect
+	github.com/redis/rueidis v1.0.25 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/tidwall/gjson v1.17.0 // indirect
@@ -66,7 +59,7 @@ require (
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.16.0 // indirect
+	golang.org/x/tools v0.16.1 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
