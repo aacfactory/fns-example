@@ -1,10 +1,15 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"github.com/aacfactory/fns"
+	_ "github.com/aacfactory/fns-contrib/databases/postgres"
+	"github.com/aacfactory/fns-contrib/transports/handlers/documents"
+	"github.com/aacfactory/fns-contrib/transports/handlers/pprof"
+	"github.com/aacfactory/fns-contrib/transports/handlers/websockets"
 	"github.com/aacfactory/fns-example/standalone/modules"
+	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/transports/middlewares/cors"
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -13,32 +18,19 @@ var (
 	Version string = "v0.0.1"
 )
 
-//go:generate fnc codes --debug .
+//go:generate go run -mod=mod github.com/aacfactory/fns-example/standalone/internal/generator -v .
 func main() {
 	// set system environment to make config be active, e.g.: export FNS-ACTIVE=local
-	app := fns.New(
-		fns.Version(Version),
-	)
-	// deploy services
-	if deployErr := app.Deploy(modules.Services()...); deployErr != nil {
-		if deployErr != nil {
-			app.Log().Error().Caller().Message(fmt.Sprintf("%+v", deployErr))
-			return
-		}
-	}
-	// run
-	if runErr := app.Run(context.TODO()); runErr != nil {
-		app.Log().Error().Caller().Message(fmt.Sprintf("%+v", runErr))
-	}
-	if app.Log().DebugEnabled() {
-		app.Log().Debug().Caller().Message("running...")
-	}
-	// sync signals
-	if syncErr := app.Sync(); syncErr != nil {
-		app.Log().Error().Caller().Message(fmt.Sprintf("%+v", syncErr))
-	}
-	if app.Log().DebugEnabled() {
-		app.Log().Debug().Message("stopped!!!")
-	}
+	fns.
+		New(
+			fns.Version(Version),
+			fns.Middleware(cors.New()),
+			fns.Handler(documents.New()),
+			fns.Handler(pprof.New()),
+			fns.Handler(websockets.New()),
+		).
+		Deploy(modules.Services()...).
+		Run(context.TODO()).
+		Sync()
 	return
 }

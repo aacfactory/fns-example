@@ -1,5 +1,5 @@
 // Package examples
-// @service examples
+// service examples
 // @title Examples
 // @description Example service
 package examples

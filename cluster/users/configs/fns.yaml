@@ -1,0 +1,30 @@
+runtime:
+  shared:
+    store:
+      cacheSize: "64mb"
+log:
+  level: warn
+  formatter: console
+  color: true
+transport:
+  port: 18081
+cluster:
+  name: "redis"
+  option:
+    initAddress:
+      - "127.0.0.1:6379"
+services:
+  sql:
+    kind: "standalone"
+    isolation: 2
+    transactionMaxAge: 10
+    debugLog: true
+    options:
+      driver: "postgres"
+      dsn: "postgres://{name}:{password}$@127.0.0.1:5432/{db}?sslmode=disable"
+      maxIdles: 0
+      maxOpens: 0
+      statements:
+        enable: true
+        cacheSize: 256
+        evictTimeoutSeconds: 10

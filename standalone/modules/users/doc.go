@@ -1,5 +1,5 @@
 // Package users
 // @service users
-// @title User
-// @description User service
+// @title Users
+// @description Users service
 package users

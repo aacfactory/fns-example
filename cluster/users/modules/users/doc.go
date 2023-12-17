@@ -1,6 +1,5 @@
 // Package users
 // @service users
-// @title User
-// @description User service
-// @internal false
+// @title Users
+// @description users service
 package users

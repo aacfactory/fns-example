@@ -1,73 +1,53 @@
 package users
 
 import (
-	"context"
-	"fmt"
-	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/sql"
-	"github.com/aacfactory/fns-contrib/databases/sql/dal"
-	"github.com/aacfactory/fns-example/standalone/repositories/postgres"
-	"github.com/aacfactory/fns/service"
-	"github.com/aacfactory/json"
+	"github.com/aacfactory/fns-example/standalone/modules/examples/components"
+	"github.com/aacfactory/fns/context"
+	"time"
 )
 
-// GetArgument
-// @title Get user argument
-// @description Get user argument
-type GetArgument struct {
+// GetParam
+// @title get param
+// @description get param
+type GetParam struct {
 	// Id
-	// @title Id
-	// @description Id
-	Id string `json:"id" validate:"required" message:"id is invalid"`
+	// @title id
+	// @description id
+	// @validate-message-i18n >>>
+	// zh: zh_message
+	// en: en_message
+	// <<<
+	Id string `json:"id" validate:"not_blank" validate-message:"invalid_id"`
 }
 
 // get
 // @fn get
+// @readonly
+// @authorization
+// @permission
 // @validation
-// @errors >>>
-// + users_get_failed
-//   - en: users get failed
-//
-// + users_get_nothing
-//   - en: users get nothing
-//
-// <<<
-// @title Get
+// @cache get-set 5
+// @cache-control max-age=10 public=true
+// @barrier
+// @metric
+// @title get
 // @description >>>
-// Get a user
+// dafasdf
+// adsfasfd
 // <<<
-func get(ctx context.Context, argument GetArgument) (result User, err errors.CodeError) {
-	log := service.GetLog(ctx)
-	row, queryErr := dal.QueryOne[*postgres.UserRow](
-		ctx,
-		dal.NewConditions(dal.Eq("ID", argument.Id)).And(dal.Eq("BD", sql.NewDate(2022, 1, 1))).And(dal.Eq("BT", sql.NewTime(10, 12, 59))),
-	)
-	if queryErr != nil {
-		if log.ErrorEnabled() {
-			log.Error().Caller().Cause(queryErr).Message("users: get failed")
-		}
-		err = errors.ServiceError("users_get_failed").WithCause(queryErr)
-		if log.DebugEnabled() {
-			log.Debug().Caller().Message(fmt.Sprintf("%+v", err))
-		}
-		return
+// @errors >>>
+// user_not_found
+// zh: zh_message
+// en: en_message
+// <<<
+func get(ctx context.Context, param GetParam) (v User, err error) {
+	v = User{
+		Id:       "1",
+		Name:     "1",
+		Age:      "1",
+		Birthday: time.Now(),
 	}
-	if row == nil {
-		err = errors.NotFound("users_get_nothing").WithMeta("id", argument.Id)
-		if log.DebugEnabled() {
-			log.Debug().Caller().Message(fmt.Sprintf("%+v", err))
-		}
-		return
-	}
-	log.Debug().Message(fmt.Sprintf("--------%s---%v---%v", row.Id, row.BD, row.BT))
-	result = User{
-		Id:       row.Id,
-		CreateAT: row.CreateAT,
-		Nickname: row.Nickname,
-		Mobile:   row.Mobile,
-		Gender:   row.Gender,
-		Birthday: json.NewDateFromTime(row.Birthday),
-		Avatar:   row.Avatar,
-	}
+	c, _ := Component[*components.HelloComponent](ctx, "hello")
+	c.Name()
 	return
 }

@@ -1,2 +1,10 @@
-http:
+runtime:
+  shared:
+    store:
+      cacheSize: "64mb"
+log:
+  level: warn
+  formatter: console
+  color: true
+transport:
   port: 18080

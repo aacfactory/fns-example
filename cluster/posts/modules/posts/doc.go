@@ -1,6 +1,5 @@
 // Package posts
 // @service posts
-// @title Post
-// @description Post service
-// @internal false
+// @title Posts
+// @description posts service
 package posts

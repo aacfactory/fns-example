@@ -3,319 +3,319 @@
 package users
 
 import (
-	"context"
-
 	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-contrib/databases/sql"
-	"github.com/aacfactory/fns/service"
-	"github.com/aacfactory/fns/service/documents"
-	"github.com/aacfactory/fns/service/validators"
+	"github.com/aacfactory/fns-example/standalone/modules/users/middles"
+	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/logs"
+	"github.com/aacfactory/fns/runtime"
+	"github.com/aacfactory/fns/services"
+	"github.com/aacfactory/fns/services/caches"
+	"github.com/aacfactory/fns/services/commons"
+	"github.com/aacfactory/fns/services/documents"
+	"github.com/aacfactory/fns/services/validators"
+	"github.com/aacfactory/fns/transports/middlewares/cachecontrol"
 )
 
-const (
-	_name     = "users"
-	_createFn = "create"
-	_getFn    = "get"
+var (
+	_endpointName = []byte("users")
+	_addFnName    = []byte("add")
+	_getFnName    = []byte("get")
+	_listFnName   = []byte("list")
 )
 
-func Create(ctx context.Context, argument CreateArgument) (result CreateArgument, err errors.CodeError) {
-	endpoint, hasEndpoint := service.GetEndpoint(ctx, _name)
-	if !hasEndpoint {
-		err = errors.Warning("users: endpoint was not found").WithMeta("name", _name)
+// +-------------------------------------------------------------------------------------------------------------------+
+
+func Add(ctx context.Context, param AddParam) (result User, err error) {
+	// validate param
+	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
 		return
 	}
-	fr, requestErr := endpoint.RequestSync(ctx, service.NewRequest(ctx, _name, _createFn, service.NewArgument(argument)))
-	if requestErr != nil {
-		err = requestErr
+	// handle
+	eps := runtime.Endpoints(ctx)
+	response, handleErr := eps.Request(ctx, _endpointName, _addFnName, param)
+	if handleErr != nil {
+		err = handleErr
 		return
 	}
-	if !fr.Exist() {
+	result, err = services.ValueOfResponse[User](response)
+	return
+
+}
+
+func _add(ctx services.Request) (v any, err error) {
+	// param
+	param, paramErr := services.ValueOfParam[AddParam](ctx.Param())
+	if paramErr != nil {
+		err = errors.BadRequest("scan params failed").WithCause(paramErr)
 		return
 	}
-	scanErr := fr.Scan(&result)
-	if scanErr != nil {
-		err = errors.Warning("users: scan future result failed").
-			WithMeta("service", _name).WithMeta("fn", _createFn).
-			WithCause(scanErr)
+	// validate param
+	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
 		return
 	}
+	// handle
+	v, err = add(ctx, param)
+	return
+
+}
+
+// +-------------------------------------------------------------------------------------------------------------------+
+
+func Get(ctx context.Context, param GetParam) (result User, err error) {
+	// validate param
+	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
+		return
+	}
+	// cache get
+	cached, cacheExist, cacheGetErr := caches.Get(ctx, &param)
+	if cacheGetErr != nil {
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(cacheGetErr).With("fns", "caches").Message("fns: get cache failed")
+		}
+	}
+	if cacheExist {
+		response := services.NewResponse(cached)
+		result, err = services.ValueOfResponse[User](response)
+		if err == nil {
+			return
+		}
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(err).With("fns", "caches").Message("fns: scan cached value failed")
+		}
+	}
+	// handle
+	eps := runtime.Endpoints(ctx)
+	response, handleErr := eps.Request(ctx, _endpointName, _getFnName, param)
+	if handleErr != nil {
+		err = handleErr
+		return
+	}
+	result, err = services.ValueOfResponse[User](response)
+	return
+
+}
+
+func _get(ctx services.Request) (v any, err error) {
+	// param
+	param, paramErr := services.ValueOfParam[GetParam](ctx.Param())
+	if paramErr != nil {
+		err = errors.BadRequest("scan params failed").WithCause(paramErr)
+		return
+	}
+	// validate param
+	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
+		return
+	}
+	// cache get
+	cached, cacheExist, cacheGetErr := caches.Get(ctx, param)
+	if cacheGetErr != nil {
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(cacheGetErr).With("fns", "caches").Message("fns: get cache failed")
+		}
+	}
+	if cacheExist {
+		v = cached
+		return
+	}
+	// handle
+	v, err = get(ctx, param)
+	// cache set
+	if cacheSetErr := caches.Set(ctx, param, v, 10); cacheSetErr != nil {
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(cacheSetErr).With("fns", "caches").Message("fns: set cache failed")
+		}
+	}
+	// cache control
+	cachecontrol.Make(ctx, cachecontrol.MaxAge(10), cachecontrol.Public())
+	return
+
+}
+
+// +-------------------------------------------------------------------------------------------------------------------+
+
+func List(ctx context.Context) (result Users, err error) {
+	// handle
+	eps := runtime.Endpoints(ctx)
+	response, handleErr := eps.Request(ctx, _endpointName, _listFnName, nil)
+	if handleErr != nil {
+		err = handleErr
+		return
+	}
+	result, err = services.ValueOfResponse[Users](response)
+	return
+
+}
+
+func _list(ctx services.Request) (v any, err error) {
+	// handle
+	v, err = list(ctx)
+	// cache control
+	cachecontrol.Make(ctx, cachecontrol.MaxAge(10), cachecontrol.Public())
+	return
+
+}
+
+// +-------------------------------------------------------------------------------------------------------------------+
+
+func Component[C services.Component](ctx context.Context, name string) (component C, has bool) {
+	component, has = services.LoadComponent[C](ctx, _endpointName, name)
 	return
 }
 
-func Get(ctx context.Context, argument GetArgument) (result GetArgument, err errors.CodeError) {
-	endpoint, hasEndpoint := service.GetEndpoint(ctx, _name)
-	if !hasEndpoint {
-		err = errors.Warning("users: endpoint was not found").WithMeta("name", _name)
-		return
-	}
-	fr, requestErr := endpoint.RequestSync(ctx, service.NewRequest(ctx, _name, _getFn, service.NewArgument(argument)))
-	if requestErr != nil {
-		err = requestErr
-		return
-	}
-	if !fr.Exist() {
-		return
-	}
-	scanErr := fr.Scan(&result)
-	if scanErr != nil {
-		err = errors.Warning("users: scan future result failed").
-			WithMeta("service", _name).WithMeta("fn", _getFn).
-			WithCause(scanErr)
-		return
-	}
-	return
-}
+// +-------------------------------------------------------------------------------------------------------------------+
 
-func Service() (v service.Service) {
-	v = &_service_{
-		Abstract: service.NewAbstract(
-			_name,
+func Service() (v services.Service) {
+	v = &_service{
+		Abstract: services.NewAbstract(
+			string(_endpointName),
 			false,
 		),
 	}
 	return
 }
 
-type _service_ struct {
-	service.Abstract
+// +-------------------------------------------------------------------------------------------------------------------+
+
+type _service struct {
+	services.Abstract
 }
 
-func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Argument) (v interface{}, err errors.CodeError) {
-	switch fn {
-	case _createFn:
-		// param
-		param := CreateArgument{}
-		paramErr := argument.As(&param)
-		if paramErr != nil {
-			err = errors.Warning("users: decode request argument failed").WithCause(paramErr)
-			break
-		}
-		err = validators.ValidateWithErrorTitle(param, "invalid")
-		if err != nil {
-			break
-		}
-		// sql begin transaction
-		beginTransactionErr := sql.BeginTransaction(ctx)
-		if beginTransactionErr != nil {
-			err = errors.Warning("users: begin sql transaction failed").WithCause(beginTransactionErr)
-			return
-		}
-		// execute function
-		v, err = create(ctx, param)
-		// sql commit transaction
-		if err == nil {
-			commitTransactionErr := sql.CommitTransaction(ctx)
-			if commitTransactionErr != nil {
-				_ = sql.RollbackTransaction(ctx)
-				err = errors.ServiceError("users: commit sql transaction failed").WithCause(commitTransactionErr)
-				return
-			}
-		}
-		break
-	case _getFn:
-		// param
-		param := GetArgument{}
-		paramErr := argument.As(&param)
-		if paramErr != nil {
-			err = errors.Warning("users: decode request argument failed").WithCause(paramErr)
-			break
-		}
-		err = validators.ValidateWithErrorTitle(param, "invalid")
-		if err != nil {
-			break
-		}
-		// execute function
-		v, err = get(ctx, param)
-		break
-	default:
-		err = errors.Warning("users: fn was not found").WithMeta("service", _name).WithMeta("fn", fn)
-		break
+func (svc *_service) Construct(options services.Options) (err error) {
+	if err = svc.Abstract.Construct(options); err != nil {
+		return
 	}
+	svc.AddFunction(commons.NewFn(string(_addFnName), false, false, true, false, false, false, _add))
+	svc.AddFunction(commons.NewFn(string(_getFnName), true, false, true, true, true, true, _get))
+	svc.AddFunction(commons.NewFn(string(_listFnName), true, false, true, true, true, true, _list, &Middle{}, &middles.Middle{}))
 	return
 }
 
-func (svc *_service_) Document() (doc service.Document) {
-	document := documents.NewService(_name, "User service")
-	// create
+func (svc *_service) Document() (document documents.Endpoint) {
+	document = documents.New(svc.Name(), "Users", "Users")
+	// add
 	document.AddFn(
-		"create", "Create user", "Create a user", false, false,
-		documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "CreateArgument").
-			SetTitle("Create user argument").
-			SetDescription("Create user argument").
-			AddProperty(
-				"nickname",
-				documents.String().
-					SetTitle("Nickname").
-					SetDescription("Nickname").
-					SetValidation(documents.NewElementValidation("nickname is invalid")),
-			).
-			AddProperty(
-				"mobile",
-				documents.String().
-					SetTitle("Mobile").
-					SetDescription("Mobile").
-					SetValidation(documents.NewElementValidation("mobile is invalid")),
-			).
-			AddProperty(
-				"gender",
-				documents.String().
-					SetTitle("Gender").
-					SetDescription("Gender").
-					AddEnum("F(female)", "M(male)", "N(unknown)").
-					SetValidation(documents.NewElementValidation("gender is invalid")),
-			).
-			AddProperty(
-				"birthday",
-				documents.Date().
-					SetTitle("Birthday").
-					SetDescription("Birthday").
-					AsRequired().
-					SetValidation(documents.NewElementValidation("birthday is invalid")),
-			),
-		documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "CreateResult").
-			SetTitle("Create user result").
-			SetDescription("Create user result").
-			AddProperty(
-				"id",
-				documents.String().
-					SetTitle("id").
-					SetDescription("user id"),
-			).
-			AddProperty(
-				"token",
-				documents.String().
-					SetTitle("token").
-					SetDescription("user token"),
-			),
-		[]documents.FnError{
-			{
-				Name_: "users_create_failed",
-				Descriptions_: map[string]string{
-					"en": "users create failed",
-				},
-			},
-		},
+		documents.NewFn("add").
+			SetInfo("add", "add user").
+			SetReadonly(false).SetInternal(false).SetDeprecated(false).
+			SetAuthorization(true).SetPermission(false).
+			SetParam(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "AddParam").
+				SetTitle("add param").
+				SetDescription("add user param").
+				AddProperty(
+					"id",
+					documents.String().
+						SetTitle("user id").
+						SetDescription("user id").
+						AsRequired().
+						SetValidation(documents.NewValidation("")),
+				).
+				AddProperty(
+					"name",
+					documents.String().
+						SetTitle("name").
+						SetDescription("name").
+						AsRequired().
+						SetValidation(documents.NewValidation("")),
+				).
+				AddProperty(
+					"age",
+					documents.Int64().
+						SetTitle("age").
+						SetDescription("age"),
+				).
+				AddProperty(
+					"birthday",
+					documents.Time().
+						SetTitle("birthday").
+						SetDescription("birthday"),
+				)).
+			SetResult(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").
+				AddProperty(
+					"id",
+					documents.String(),
+				).
+				AddProperty(
+					"name",
+					documents.String(),
+				).
+				AddProperty(
+					"age",
+					documents.String(),
+				).
+				AddProperty(
+					"birthday",
+					documents.DateTime(),
+				)).
+			SetErrors("user_not_found\nzh: zh_message\nen: en_message"),
 	)
 
 	// get
 	document.AddFn(
-		"get", "Get", "Get a user", false, false,
-		documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "GetArgument").
-			SetTitle("Get user argument").
-			SetDescription("Get user argument").
-			AddProperty(
-				"id",
-				documents.String().
-					SetTitle("Id").
-					SetDescription("Id").
-					AsRequired().
-					SetValidation(documents.NewElementValidation("id is invalid")),
-			),
-		documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").
-			SetTitle("User").
-			SetDescription("User model").
-			AddProperty(
-				"id",
-				documents.String().
-					SetTitle("Id").
-					SetDescription("Id"),
-			).
-			AddProperty(
-				"createAt",
-				documents.DateTime().
-					SetTitle("create time").
-					SetDescription("create time"),
-			).
-			AddProperty(
-				"nickname",
-				documents.String().
-					SetTitle("nickname").
-					SetDescription("nickname"),
-			).
-			AddProperty(
-				"mobile",
-				documents.String().
-					SetTitle("mobile").
-					SetDescription("mobile"),
-			).
-			AddProperty(
-				"gender",
-				documents.String().
-					SetTitle("gender").
-					SetDescription("gender").
-					AddEnum("F(female)", "M(male)", "N(unknown)"),
-			).
-			AddProperty(
-				"birthday",
-				documents.Date().
-					SetTitle("birthday").
-					SetDescription("birthday"),
-			).
-			AddProperty(
-				"avatar",
-				documents.Struct("github.com/aacfactory/fns-example/standalone/repositories/postgres", "Avatar").
-					SetTitle("Avatar").
-					SetDescription("Avatar info").
-					AddProperty(
-						"schema",
-						documents.String().
-							SetTitle("http schema").
-							SetDescription("http schema"),
-					).
-					AddProperty(
-						"domain",
-						documents.String().
-							SetTitle("domain").
-							SetDescription("domain"),
-					).
-					AddProperty(
-						"path",
-						documents.String().
-							SetTitle("uri path").
-							SetDescription("uri path"),
-					).
-					AddProperty(
-						"mimeType",
-						documents.String().
-							SetTitle("mime type").
-							SetDescription("mime type"),
-					).
-					AddProperty(
-						"url",
-						documents.String().
-							SetTitle("url").
-							SetDescription("full url"),
-					).
-					SetTitle("user avatar").
-					SetDescription("user avatar"),
-			).
-			AddProperty(
-				"parent",
-				documents.Ref("github.com/aacfactory/fns-example/standalone/modules/users", "User").
-					SetTitle("user parent").
-					SetDescription("user parent"),
-			).
-			AddProperty(
-				"bd",
-				documents.Date(),
-			),
-		[]documents.FnError{
-			{
-				Name_: "users_get_failed",
-				Descriptions_: map[string]string{
-					"en": "users get failed",
-				},
-			},
-			{
-				Name_: "users_get_nothing",
-				Descriptions_: map[string]string{
-					"en": "users get nothing",
-				},
-			},
-		},
+		documents.NewFn("get").
+			SetInfo("get", "dafasdf\nadsfasfd").
+			SetReadonly(true).SetInternal(false).SetDeprecated(false).
+			SetAuthorization(true).SetPermission(true).
+			SetParam(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "GetParam").
+				SetTitle("get param").
+				SetDescription("get param").
+				AddProperty(
+					"id",
+					documents.String().
+						SetTitle("id").
+						SetDescription("id").
+						SetValidation(documents.NewValidation("invalid_id").AddI18n("zh", "zh_message").AddI18n("en", "en_message")),
+				)).
+			SetResult(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").
+				AddProperty(
+					"id",
+					documents.String(),
+				).
+				AddProperty(
+					"name",
+					documents.String(),
+				).
+				AddProperty(
+					"age",
+					documents.String(),
+				).
+				AddProperty(
+					"birthday",
+					documents.DateTime(),
+				)).
+			SetErrors("user_not_found\nzh: zh_message\nen: en_message"),
 	)
 
-	doc = document
+	// list
+	document.AddFn(
+		documents.NewFn("list").
+			SetInfo("list", "dafasdf\nadsfasfd").
+			SetReadonly(true).SetInternal(false).SetDeprecated(false).
+			SetAuthorization(true).SetPermission(true).
+			SetParam(documents.Nil()).
+			SetResult(documents.Array(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "User").
+				AddProperty(
+					"id",
+					documents.String(),
+				).
+				AddProperty(
+					"name",
+					documents.String(),
+				).
+				AddProperty(
+					"age",
+					documents.String(),
+				).
+				AddProperty(
+					"birthday",
+					documents.DateTime(),
+				)).
+				SetPath("github.com/aacfactory/fns-example/standalone/modules/users").
+				SetName("Users")).
+			SetErrors("user_not_found\nzh: zh_message\nen: en_message"),
+	)
 	return
-
 }

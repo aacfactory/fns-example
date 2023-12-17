@@ -1,21 +1,22 @@
 package components
 
-import "github.com/aacfactory/fns/service"
+import (
+	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/services"
+)
 
 // HelloComponent
-// @components
+// @component
 type HelloComponent struct {
 }
 
-func (h *HelloComponent) Name() (name string) {
-	name = "hello_component"
+func (component *HelloComponent) Name() (name string) {
+	return "hello"
+}
+
+func (component *HelloComponent) Construct(options services.Options) (err error) {
 	return
 }
 
-func (h *HelloComponent) Build(options service.ComponentOptions) (err error) {
-	return
-}
-
-func (h *HelloComponent) Close() {
-	return
+func (component *HelloComponent) Shutdown(ctx context.Context) {
 }

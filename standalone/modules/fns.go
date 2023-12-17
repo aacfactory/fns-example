@@ -3,16 +3,12 @@
 package modules
 
 import (
-	"github.com/aacfactory/fns-example/standalone/modules/examples"
-	"github.com/aacfactory/fns-example/standalone/modules/posts"
 	"github.com/aacfactory/fns-example/standalone/modules/users"
-	"github.com/aacfactory/fns/service"
+	"github.com/aacfactory/fns/services"
 )
 
-func services() (v []service.Service) {
-	v = []service.Service{
-		examples.Service(),
-		posts.Service(),
+func endpoints() (v []services.Service) {
+	v = []services.Service{
 		users.Service(),
 	}
 	return

@@ -3,123 +3,137 @@
 package examples
 
 import (
-	"context"
-	"time"
-
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-example/standalone/modules/examples/components"
-	"github.com/aacfactory/fns/service"
-	"github.com/aacfactory/fns/service/documents"
+	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/logs"
+	"github.com/aacfactory/fns/runtime"
+	"github.com/aacfactory/fns/services"
+	"github.com/aacfactory/fns/services/caches"
+	"github.com/aacfactory/fns/services/commons"
+	"github.com/aacfactory/fns/services/documents"
+	"github.com/aacfactory/fns/services/validators"
 )
 
-const (
-	_name    = "examples"
-	_helloFn = "hello"
+var (
+	_endpointName = []byte("examples")
+	_helloFnName  = []byte("hello")
 )
 
-func Hello(ctx context.Context, argument HelloArgument) (result HelloArgument, err errors.CodeError) {
-	endpoint, hasEndpoint := service.GetEndpoint(ctx, _name)
-	if !hasEndpoint {
-		err = errors.Warning("examples: endpoint was not found").WithMeta("name", _name)
+func Hello(ctx context.Context, param HelloParam) (result HelloResults, err error) {
+	// validate param
+	if err = validators.Validate(param); err != nil {
 		return
 	}
-	fr, requestErr := endpoint.RequestSync(ctx, service.NewRequest(ctx, _name, _helloFn, service.NewArgument(argument)))
-	if requestErr != nil {
-		err = requestErr
+	// cache
+	cached, cacheExist, cacheGetErr := caches.Get(ctx, &param)
+	if cacheGetErr != nil {
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(cacheGetErr).With("fns", "caches").Message("fns: get cache failed")
+		}
+	}
+	if cacheExist {
+		response := services.NewResponse(cached)
+		result, err = services.ValueOfResponse[HelloResults](response)
+		if err == nil {
+			return
+		}
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(cacheGetErr).With("fns", "caches").Message("fns: scan cached value failed")
+		}
+	}
+	// handle
+	eps := runtime.Endpoints(ctx)
+	response, handleErr := eps.Request(ctx, _endpointName, _helloFnName, param)
+	if handleErr != nil {
+		err = handleErr
 		return
 	}
-	if !fr.Exist() {
-		return
-	}
-	scanErr := fr.Scan(&result)
-	if scanErr != nil {
-		err = errors.Warning("examples: scan future result failed").
-			WithMeta("service", _name).WithMeta("fn", _helloFn).
-			WithCause(scanErr)
-		return
-	}
+	result, err = services.ValueOfResponse[HelloResults](response)
+	//scanErr := response.Scan(&result)
+	//if scanErr != nil {
+	//	err = scanErr
+	//	return
+	//}
 	return
 }
 
-func Service() (v service.Service) {
-	v = &_service_{
-		Abstract: service.NewAbstract(
-			_name,
+func _helloFn(ctx services.Request) (v interface{}, err error) {
+	// param
+	param, paramErr := services.ValueOfParam[HelloParam](ctx.Param())
+	if paramErr != nil {
+		err = errors.BadRequest("scan params failed").WithCause(paramErr)
+		return
+	}
+	// validate
+	if err = validators.Validate(param); err != nil {
+		return
+	}
+	// cache
+	cached, cacheExist, cacheGetErr := caches.Get(ctx, param)
+	if cacheGetErr != nil {
+		log := logs.Load(ctx)
+		if log.WarnEnabled() {
+			log.Warn().Cause(cacheGetErr).With("fns", "caches").Message("fns: get cache failed")
+		}
+	}
+	if cacheExist {
+		v = cached
+		return
+	}
+	// handle
+	v, err = hello(ctx, param)
+	return
+}
+
+func Component[C services.Component](ctx context.Context, name string) (component C, has bool) {
+	component, has = services.LoadComponent[C](ctx, _endpointName, name)
+	return
+}
+
+func Service() (v services.Service) {
+	v = &_service{
+		Abstract: services.NewAbstract(
+			string(_endpointName),
 			false,
-			[]service.Component{
-				&components.HelloComponent{},
-			}...,
+			&components.HelloComponent{},
 		),
 	}
 	return
 }
 
-type _service_ struct {
-	service.Abstract
+type _service struct {
+	services.Abstract
 }
 
-func (svc *_service_) Handle(ctx context.Context, fn string, argument service.Argument) (v interface{}, err errors.CodeError) {
-	switch fn {
-	case _helloFn:
-		// param
-		param := HelloArgument{}
-		paramErr := argument.As(&param)
-		if paramErr != nil {
-			err = errors.Warning("examples: decode request argument failed").WithCause(paramErr)
-			break
-		}
-		// make timeout context
-		var cancel context.CancelFunc = nil
-		ctx, cancel = context.WithTimeout(ctx, time.Duration(1000000000))
-		// barrier
-		v, err = svc.Barrier(ctx, _helloFn, argument, func() (v interface{}, err errors.CodeError) {
-			// execute function
-			v, err = hello(ctx, param)
-			return
-		})
-		// cancel timeout context
-		cancel()
-		break
-	default:
-		err = errors.Warning("examples: fn was not found").WithMeta("service", _name).WithMeta("fn", fn)
-		break
+func (svc *_service) Construct(options services.Options) (err error) {
+	if err = svc.Abstract.Construct(options); err != nil {
+		return
 	}
+	svc.AddFunction(commons.NewFn(string(_helloFnName), true, false, false, false, false, false, _helloFn, &HelloMiddleware{}))
 	return
 }
 
-func (svc *_service_) Document() (doc service.Document) {
-	document := documents.NewService(_name, "Example service")
-	// hello
+func (svc *_service) Document() (document documents.Endpoint) {
 	document.AddFn(
-		"hello", "Hello", "Hello", false, false,
-		documents.Struct("github.com/aacfactory/fns-example/standalone/modules/examples", "HelloArgument").
-			SetTitle("Hello function argument").
-			SetDescription("Hello function argument").
-			AddProperty(
-				"world",
-				documents.String().
-					SetTitle("Name").
-					SetDescription("Name").
-					AsRequired().
-					SetValidation(documents.NewElementValidation("world_required", "zh", "世界是必须的", "en", "world is required")),
-			),
-		documents.Array(documents.String()).
-			SetPath("github.com/aacfactory/fns-example/standalone/modules/examples").
-			SetName("HelloResults").
-			SetTitle("Hello Results").
-			SetDescription("Hello Results"),
-		[]documents.FnError{
-			{
-				Name_: "examples_hello_failed",
-				Descriptions_: map[string]string{
-					"zh": "错误",
-					"en": "failed",
-				},
-			},
-		},
+		documents.NewFn(string(_helloFnName)).
+			SetInfo("", "").
+			SetReadonly(false).SetDeprecated(false).
+			SetAuthorization(false).SetPermission(false).
+			SetParam(documents.Unknown()).
+			SetResult(documents.Unknown()).
+			SetErrors("s"),
 	)
-
-	doc = document
+	document.AddFn(
+		documents.NewFn(string(_helloFnName)).
+			SetInfo("", "").
+			SetReadonly(false).SetDeprecated(false).
+			SetAuthorization(false).SetPermission(false).
+			SetParam(documents.Unknown()).
+			SetResult(documents.Unknown()).
+			SetErrors("s"),
+	)
 	return
-
 }
