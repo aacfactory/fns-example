@@ -27,7 +27,7 @@ require (
 	github.com/aacfactory/afssl v1.10.0 // indirect
 	github.com/aacfactory/cases v1.1.0 // indirect
 	github.com/aacfactory/configures v1.12.1 // indirect
-	github.com/aacfactory/json v1.16.5 // indirect
+	github.com/aacfactory/json v1.16.6 // indirect
 	github.com/aacfactory/logs v1.13.12 // indirect
 	github.com/aacfactory/workers v1.8.4 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
@@ -69,4 +69,5 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.16.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 )
