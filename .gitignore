@@ -307,5 +307,6 @@ standalone/config/fns-debug.yaml
 standalone/configs/fns-private.yaml
 cluster/users/configs/fns-private.yaml
 cluster/posts/configs/fns-private.yaml
+cluster/gateway/configs/fns-private.yaml
 
 ### TEMP
