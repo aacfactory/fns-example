@@ -1,6 +1,7 @@
 package users
 
 import (
+	"fmt"
 	"github.com/aacfactory/fns-example/standalone/modules/examples/components"
 	"github.com/aacfactory/fns/context"
 	"time"
@@ -20,16 +21,19 @@ type GetParam struct {
 	Id string `json:"id" validate:"not_blank" validate-message:"invalid_id"`
 }
 
+func (param GetParam) CacheKey(ctx context.Context) (key []byte, err error) {
+	key = []byte(fmt.Sprintf("users:%s", param.Id))
+	return
+}
+
 // get
 // @fn get
 // @readonly
-// @authorization
-// @permission
 // @validation
-// @cache get-set 5
-// @cache-control max-age=10 public=true
-// @barrier
 // @metric
+// @cache get-set 50
+// @cache-control max-age=100 public=true
+// @barrier
 // @title get
 // @description >>>
 // dafasdf

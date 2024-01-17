@@ -4,7 +4,7 @@ runtime:
       cacheSize: "64mb"
 log:
   level: warn
-  formatter: console
+  formatter: text_colorful
   color: true
 transport:
   port: 18083
@@ -15,6 +15,9 @@ cluster:
       - "127.0.0.1:6379"
 proxy:
   port: 18080
+  middlewares:
+    compress:
+      enable: true
 services:
   sql:
     kind: "standalone"

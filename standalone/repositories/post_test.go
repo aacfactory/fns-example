@@ -5,6 +5,7 @@ import (
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-contrib/databases/postgres"
 	"github.com/aacfactory/fns-example/standalone/repositories"
+	"github.com/aacfactory/fns/logs"
 	"github.com/aacfactory/fns/services/authorizations"
 	"github.com/aacfactory/fns/tests"
 	_ "github.com/lib/pq"
@@ -17,6 +18,7 @@ import (
 func TestPost_Query(t *testing.T) {
 	setupPostgres(t)
 	defer tests.Teardown()
+	ctx := tests.TODO()
 	beg := time.Now()
 	rows, queryErr := postgres.Query[repositories.PostRow](
 		tests.TODO(),
@@ -28,8 +30,10 @@ func TestPost_Query(t *testing.T) {
 		t.Errorf("%+v", queryErr)
 		return
 	}
+	log := logs.Load(ctx)
 	for _, row := range rows {
-		fmt.Println(fmt.Sprintf("%+v", row))
+		log.Info().Message(fmt.Sprintf("%+v", row))
+		//fmt.Println(fmt.Sprintf("%+v", row))
 	}
 }
 

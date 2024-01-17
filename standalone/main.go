@@ -8,6 +8,7 @@ import (
 	"github.com/aacfactory/fns-contrib/transports/handlers/websockets"
 	"github.com/aacfactory/fns-example/standalone/modules"
 	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/transports/middlewares/compress"
 	"github.com/aacfactory/fns/transports/middlewares/cors"
 	_ "github.com/lib/pq"
 )
@@ -25,6 +26,7 @@ func main() {
 		New(
 			fns.Version(Version),
 			fns.Middleware(cors.New()),
+			fns.Middleware(compress.New()),
 			fns.Handler(documents.New()),
 			fns.Handler(pprof.New()),
 			fns.Handler(websockets.New()),

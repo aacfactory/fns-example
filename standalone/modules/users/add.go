@@ -31,6 +31,7 @@ type AddParam struct {
 // @fn add
 // @authorization
 // @validation
+// @cache set
 // @title add
 // @description >>>
 // add user

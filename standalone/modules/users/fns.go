@@ -3,8 +3,7 @@
 package users
 
 import (
-	"github.com/aacfactory/errors"
-	"github.com/aacfactory/fns-example/standalone/modules/users/middles"
+	"github.com/aacfactory/fns/commons/futures"
 	"github.com/aacfactory/fns/context"
 	"github.com/aacfactory/fns/logs"
 	"github.com/aacfactory/fns/runtime"
@@ -13,7 +12,6 @@ import (
 	"github.com/aacfactory/fns/services/commons"
 	"github.com/aacfactory/fns/services/documents"
 	"github.com/aacfactory/fns/services/validators"
-	"github.com/aacfactory/fns/transports/middlewares/cachecontrol"
 )
 
 var (
@@ -39,24 +37,17 @@ func Add(ctx context.Context, param AddParam) (result User, err error) {
 	}
 	result, err = services.ValueOfResponse[User](response)
 	return
-
 }
 
-func _add(ctx services.Request) (v any, err error) {
-	// param
-	param, paramErr := services.ValueOfParam[AddParam](ctx.Param())
-	if paramErr != nil {
-		err = errors.BadRequest("scan params failed").WithCause(paramErr)
-		return
-	}
+func AddAsync(ctx context.Context, param AddParam) (future futures.Future, err error) {
 	// validate param
 	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
 		return
 	}
 	// handle
-	v, err = add(ctx, param)
+	eps := runtime.Endpoints(ctx)
+	future, err = eps.RequestAsync(ctx, _endpointName, _addFnName, param)
 	return
-
 }
 
 // +-------------------------------------------------------------------------------------------------------------------+
@@ -67,7 +58,7 @@ func Get(ctx context.Context, param GetParam) (result User, err error) {
 		return
 	}
 	// cache get
-	cached, cacheExist, cacheGetErr := caches.Get(ctx, &param)
+	cached, cacheExist, cacheGetErr := caches.Load[User](ctx, param)
 	if cacheGetErr != nil {
 		log := logs.Load(ctx)
 		if log.WarnEnabled() {
@@ -75,15 +66,8 @@ func Get(ctx context.Context, param GetParam) (result User, err error) {
 		}
 	}
 	if cacheExist {
-		response := services.NewResponse(cached)
-		result, err = services.ValueOfResponse[User](response)
-		if err == nil {
-			return
-		}
-		log := logs.Load(ctx)
-		if log.WarnEnabled() {
-			log.Warn().Cause(err).With("fns", "caches").Message("fns: scan cached value failed")
-		}
+		result = cached
+		return
 	}
 	// handle
 	eps := runtime.Endpoints(ctx)
@@ -94,22 +78,15 @@ func Get(ctx context.Context, param GetParam) (result User, err error) {
 	}
 	result, err = services.ValueOfResponse[User](response)
 	return
-
 }
 
-func _get(ctx services.Request) (v any, err error) {
-	// param
-	param, paramErr := services.ValueOfParam[GetParam](ctx.Param())
-	if paramErr != nil {
-		err = errors.BadRequest("scan params failed").WithCause(paramErr)
-		return
-	}
+func GetAsync(ctx context.Context, param GetParam) (future futures.Future, err error) {
 	// validate param
 	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
 		return
 	}
 	// cache get
-	cached, cacheExist, cacheGetErr := caches.Get(ctx, param)
+	cached, cacheExist, cacheGetErr := caches.Load[User](ctx, param)
 	if cacheGetErr != nil {
 		log := logs.Load(ctx)
 		if log.WarnEnabled() {
@@ -117,22 +94,15 @@ func _get(ctx services.Request) (v any, err error) {
 		}
 	}
 	if cacheExist {
-		v = cached
+		var promise futures.Promise
+		promise, future = futures.New()
+		promise.Succeed(services.NewResponse(cached))
 		return
 	}
 	// handle
-	v, err = get(ctx, param)
-	// cache set
-	if cacheSetErr := caches.Set(ctx, param, v, 10); cacheSetErr != nil {
-		log := logs.Load(ctx)
-		if log.WarnEnabled() {
-			log.Warn().Cause(cacheSetErr).With("fns", "caches").Message("fns: set cache failed")
-		}
-	}
-	// cache control
-	cachecontrol.Make(ctx, cachecontrol.MaxAge(10), cachecontrol.Public())
+	eps := runtime.Endpoints(ctx)
+	future, err = eps.RequestAsync(ctx, _endpointName, _getFnName, param)
 	return
-
 }
 
 // +-------------------------------------------------------------------------------------------------------------------+
@@ -147,16 +117,13 @@ func List(ctx context.Context) (result Users, err error) {
 	}
 	result, err = services.ValueOfResponse[Users](response)
 	return
-
 }
 
-func _list(ctx services.Request) (v any, err error) {
+func ListAsync(ctx context.Context) (future futures.Future, err error) {
 	// handle
-	v, err = list(ctx)
-	// cache control
-	cachecontrol.Make(ctx, cachecontrol.MaxAge(10), cachecontrol.Public())
+	eps := runtime.Endpoints(ctx)
+	future, err = eps.RequestAsync(ctx, _endpointName, _listFnName, nil)
 	return
-
 }
 
 // +-------------------------------------------------------------------------------------------------------------------+
@@ -188,14 +155,63 @@ func (svc *_service) Construct(options services.Options) (err error) {
 	if err = svc.Abstract.Construct(options); err != nil {
 		return
 	}
-	svc.AddFunction(commons.NewFn(string(_addFnName), false, false, true, false, false, false, _add))
-	svc.AddFunction(commons.NewFn(string(_getFnName), true, false, true, true, true, true, _get))
-	svc.AddFunction(commons.NewFn(string(_listFnName), true, false, true, true, true, true, _list, &Middle{}, &middles.Middle{}))
+	// add
+	svc.AddFunction(commons.NewFn[AddParam, User](
+		string(_addFnName),
+		func(ctx context.Context, param AddParam) (v User, err error) {
+			// handle
+			v, err = add(ctx, param)
+			if err != nil {
+				return
+			}
+			return
+		},
+		commons.Validation("invalid"),
+		commons.Authorization(),
+		commons.Cache("set", "10"),
+	))
+	// get
+	svc.AddFunction(commons.NewFn[GetParam, User](
+		string(_getFnName),
+		func(ctx context.Context, param GetParam) (v User, err error) {
+			// handle
+			v, err = get(ctx, param)
+			if err != nil {
+				return
+			}
+			return
+		},
+		commons.Readonly(),
+		commons.Validation("invalid"),
+		commons.Barrier(),
+		commons.Metric(),
+		commons.Cache("get-set", "50"),
+		commons.CacheControl(100, true, false, false),
+	))
+	// list
+	svc.AddFunction(commons.NewFn[services.Empty, Users](
+		string(_listFnName),
+		func(ctx context.Context, param services.Empty) (v Users, err error) {
+			// handle
+			v, err = list(ctx)
+			if err != nil {
+				return
+			}
+			return
+		},
+		commons.Readonly(),
+		commons.Authorization(),
+		commons.Permission(),
+		commons.Barrier(),
+		commons.Metric(),
+		commons.Cache("get-set", "5"),
+		commons.CacheControl(10, true, false, false),
+	))
 	return
 }
 
 func (svc *_service) Document() (document documents.Endpoint) {
-	document = documents.New(svc.Name(), "Users", "Users")
+	document = documents.New(svc.Name(), "Users", "Users", svc.Version())
 	// add
 	document.AddFn(
 		documents.NewFn("add").
@@ -258,7 +274,7 @@ func (svc *_service) Document() (document documents.Endpoint) {
 		documents.NewFn("get").
 			SetInfo("get", "dafasdf\nadsfasfd").
 			SetReadonly(true).SetInternal(false).SetDeprecated(false).
-			SetAuthorization(true).SetPermission(true).
+			SetAuthorization(false).SetPermission(false).
 			SetParam(documents.Struct("github.com/aacfactory/fns-example/standalone/modules/users", "GetParam").
 				SetTitle("get param").
 				SetDescription("get param").

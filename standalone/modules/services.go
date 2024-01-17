@@ -5,6 +5,7 @@ package modules
 import (
 	"github.com/aacfactory/fns-example/standalone/modules/examples"
 	"github.com/aacfactory/fns/services"
+	"github.com/aacfactory/fns/services/caches"
 )
 
 func Services() (v []services.Service) {
@@ -19,6 +20,7 @@ func Services() (v []services.Service) {
 func dependencies() (v []services.Service) {
 	v = []services.Service{
 		// add dependencies here
+		caches.New(),
 	}
 	return
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns/context"
-	"github.com/aacfactory/fns/services"
-	"github.com/aacfactory/fns/services/commons"
 	"github.com/aacfactory/fns/transports"
 	"sync/atomic"
 	"time"
@@ -65,14 +63,4 @@ func hello(ctx context.Context, param HelloParam) (result HelloResults, err erro
 	w := transports.LoadResponseWriter(ctx)
 	fmt.Println(w.LocalValue([]byte("@fns:context:runtime")) != nil)
 	return
-}
-
-type HelloMiddleware struct {
-}
-
-func (middle *HelloMiddleware) Handler(next commons.FnHandler) commons.FnHandler {
-	return func(ctx services.Request) (v interface{}, err error) {
-		v, err = next(ctx)
-		return
-	}
 }

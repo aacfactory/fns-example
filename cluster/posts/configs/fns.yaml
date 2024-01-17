@@ -4,7 +4,7 @@ runtime:
       cacheSize: "64mb"
 log:
   level: warn
-  formatter: console
+  formatter: text_colorful
   color: true
 transport:
   port: 18082

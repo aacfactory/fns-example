@@ -3,15 +3,14 @@
 package users
 
 import (
-	"github.com/aacfactory/errors"
 	"github.com/aacfactory/fns-example/cluster/posts/modules/posts"
+	"github.com/aacfactory/fns/commons/futures"
 	"github.com/aacfactory/fns/context"
 	"github.com/aacfactory/fns/runtime"
 	"github.com/aacfactory/fns/services"
 	"github.com/aacfactory/fns/services/commons"
 	"github.com/aacfactory/fns/services/documents"
 	"github.com/aacfactory/fns/services/validators"
-	"github.com/aacfactory/fns/transports/middlewares/cachecontrol"
 )
 
 var (
@@ -35,26 +34,17 @@ func Post(ctx context.Context, param PostsParam) (result posts.Posts, err error)
 	}
 	result, err = services.ValueOfResponse[posts.Posts](response)
 	return
-
 }
 
-func _post(ctx services.Request) (v any, err error) {
-	// param
-	param, paramErr := services.ValueOfParam[PostsParam](ctx.Param())
-	if paramErr != nil {
-		err = errors.BadRequest("scan params failed").WithCause(paramErr)
-		return
-	}
+func PostAsync(ctx context.Context, param PostsParam) (future futures.Future, err error) {
 	// validate param
 	if err = validators.ValidateWithErrorTitle(param, "invalid"); err != nil {
 		return
 	}
 	// handle
-	v, err = post(ctx, param)
-	// cache control
-	cachecontrol.Make(ctx, cachecontrol.MaxAge(10), cachecontrol.Public())
+	eps := runtime.Endpoints(ctx)
+	future, err = eps.RequestAsync(ctx, _endpointName, _postFnName, param)
 	return
-
 }
 
 // +-------------------------------------------------------------------------------------------------------------------+
@@ -86,7 +76,23 @@ func (svc *_service) Construct(options services.Options) (err error) {
 	if err = svc.Abstract.Construct(options); err != nil {
 		return
 	}
-	svc.AddFunction(commons.NewFn(string(_postFnName), true, false, false, false, true, true, _post))
+	// post
+	svc.AddFunction(commons.NewFn[PostsParam, posts.Posts](
+		string(_postFnName),
+		func(ctx context.Context, param PostsParam) (v posts.Posts, err error) {
+			// handle
+			v, err = post(ctx, param)
+			if err != nil {
+				return
+			}
+			return
+		},
+		commons.Readonly(),
+		commons.Validation("invalid"),
+		commons.Barrier(),
+		commons.Metric(),
+		commons.CacheControl(10, true, false, false),
+	))
 	return
 }
 

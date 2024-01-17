@@ -1,11 +1,8 @@
 package users
 
 import (
-	"fmt"
 	"github.com/aacfactory/fns-example/standalone/modules/examples/components"
 	"github.com/aacfactory/fns/context"
-	"github.com/aacfactory/fns/services"
-	"github.com/aacfactory/fns/services/commons"
 	"time"
 )
 
@@ -45,15 +42,4 @@ func list(ctx context.Context) (v Users, err error) {
 	c, _ := Component[*components.HelloComponent](ctx, "hello")
 	c.Name()
 	return
-}
-
-type Middle struct {
-}
-
-func (m Middle) Handler(next commons.FnHandler) commons.FnHandler {
-	return func(r services.Request) (v interface{}, err error) {
-		fmt.Println("1")
-		v, err = next(r)
-		return
-	}
 }

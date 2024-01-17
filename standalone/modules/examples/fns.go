@@ -10,7 +10,6 @@ import (
 	"github.com/aacfactory/fns/runtime"
 	"github.com/aacfactory/fns/services"
 	"github.com/aacfactory/fns/services/caches"
-	"github.com/aacfactory/fns/services/commons"
 	"github.com/aacfactory/fns/services/documents"
 	"github.com/aacfactory/fns/services/validators"
 )
@@ -112,7 +111,6 @@ func (svc *_service) Construct(options services.Options) (err error) {
 	if err = svc.Abstract.Construct(options); err != nil {
 		return
 	}
-	svc.AddFunction(commons.NewFn(string(_helloFnName), true, false, false, false, false, false, _helloFn, &HelloMiddleware{}))
 	return
 }
 

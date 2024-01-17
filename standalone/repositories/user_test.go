@@ -49,9 +49,18 @@ func TestUser_Insert(t *testing.T) {
 			Mobile:   "14400000001",
 			Gender:   "F",
 			Birthday: time.Now(),
-			Avatar:   sql.NullJson[repositories.Avatar]{},
-			BD:       times.DateNow(),
-			BT:       times.TimeNow(),
+			Avatar: sql.NullJson[repositories.Avatar]{
+				Valid: true,
+				E: repositories.Avatar{
+					Schema:   "s",
+					Domain:   "d",
+					Path:     "p",
+					MimeType: "m",
+					URL:      "u",
+				},
+			},
+			BD: times.DateNow(),
+			BT: times.TimeNow(),
 		},
 	)
 	fmt.Println("latency", time.Now().Sub(beg).String())

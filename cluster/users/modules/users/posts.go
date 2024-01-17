@@ -3,6 +3,8 @@ package users
 import (
 	"github.com/aacfactory/fns-example/cluster/posts/modules/posts"
 	"github.com/aacfactory/fns/context"
+	"github.com/aacfactory/fns/runtime"
+	"time"
 )
 
 type PostsParam struct {
@@ -26,6 +28,13 @@ type PostsParam struct {
 // en: en_message
 // <<<
 func post(ctx context.Context, param PostsParam) (v posts.Posts, err error) {
+	locker, lockerErr := runtime.AcquireLocker(ctx, []byte("uuu"), 2*time.Second)
+	if lockerErr != nil {
+		err = lockerErr
+		return
+	}
+	locker.Lock(ctx)
+	defer locker.Unlock(ctx)
 	v, err = posts.List(ctx, posts.ListParam{
 		UserId: param.UserId,
 		Offset: 0,

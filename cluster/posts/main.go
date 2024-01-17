@@ -14,7 +14,7 @@ var (
 	Version string = "v0.0.1"
 )
 
-//go:generate go run -mod=mod github.com/aacfactory/fns-example/cluster/posts/internal/generator -v .
+//go:generate go run github.com/aacfactory/fns-example/cluster/posts/internal/generator -v .
 func main() {
 	// set system environment to make config be active, e.g.: export FNS-ACTIVE=local
 	fns.
